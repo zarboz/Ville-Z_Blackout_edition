@@ -40,12 +40,6 @@
 #define ADRENO_DEFAULT_PWRSCALE_POLICY  NULL
 #endif
 
-/*
- * constants for the size of shader instructions
- */
-#define ADRENO_ISTORE_BYTES 12
-#define ADRENO_ISTORE_WORDS 3
-#define ADRENO_ISTORE_START 0x5000
 
 enum adreno_gpurev {
 	ADRENO_REV_UNKNOWN = 0,
@@ -72,27 +66,20 @@ struct adreno_device {
 	struct adreno_ringbuffer ringbuffer;
 	unsigned int mharb;
 	struct adreno_gpudev *gpudev;
-	unsigned int wait_timeout;
-	unsigned int istore_size;
-	unsigned int pix_shader_start;
 };
 
 struct adreno_gpudev {
-	int (*ctxt_create)(struct adreno_device *, struct adreno_context *);
+	int (*ctxt_gpustate_shadow)(struct adreno_device *,
+		struct adreno_context *);
+	int (*ctxt_gmem_shadow)(struct adreno_device *,
+		struct adreno_context *);
 	void (*ctxt_save)(struct adreno_device *, struct adreno_context *);
 	void (*ctxt_restore)(struct adreno_device *, struct adreno_context *);
 	irqreturn_t (*irq_handler)(struct adreno_device *);
 	void (*irq_control)(struct adreno_device *, int);
-	void * (*snapshot)(struct adreno_device *, void *, int *, int);
 };
 
 extern struct adreno_gpudev adreno_a2xx_gpudev;
-
-/* A2XX register sets defined in adreno_a2xx.c */
-extern const unsigned int a200_registers[];
-extern const unsigned int a220_registers[];
-extern const unsigned int a200_registers_count;
-extern const unsigned int a220_registers_count;
 
 int adreno_idle(struct kgsl_device *device, unsigned int timeout);
 void adreno_regread(struct kgsl_device *device, unsigned int offsetwords,

@@ -185,7 +185,7 @@ static void adreno_gmeminit(struct adreno_device *adreno_dev)
 	adreno_regwrite(device, REG_RB_EDRAM_INFO, rb_edram_info.val);
 }
 
-static irqreturn_t adreno_isr(int irq, void *data)
+irqreturn_t adreno_isr(int irq, void *data)
 {
 	irqreturn_t result;
 	struct kgsl_device *device = data;
@@ -424,17 +424,8 @@ adreno_identify_gpu(struct adreno_device *adreno_dev)
 			break;
 	}
 
-	if (i == ARRAY_SIZE(adreno_gpulist)) {
-		adreno_dev->gpurev = ADRENO_REV_UNKNOWN;
-		return;
-	}
-
-	adreno_dev->gpurev = adreno_gpulist[i].gpurev;
-	adreno_dev->gpudev = adreno_gpulist[i].gpudev;
-	adreno_dev->pfp_fwfile = adreno_gpulist[i].pfpfw;
-	adreno_dev->pm4_fwfile = adreno_gpulist[i].pm4fw;
-	adreno_dev->istore_size = adreno_gpulist[i].istore_size;
-	adreno_dev->pix_shader_start = adreno_gpulist[i].pix_shader_start;
+	adreno_dev->gpurev = gpurev;
+	adreno_dev->gpudev = &adreno_a2xx_gpudev;
 }
 
 static int __devinit
@@ -1354,18 +1345,6 @@ void adreno_irqctrl(struct kgsl_device *device, int state)
 {
 	struct adreno_device *adreno_dev = ADRENO_DEVICE(device);
 	adreno_dev->gpudev->irq_control(adreno_dev, state);
-}
-
-static unsigned int adreno_gpuid(struct kgsl_device *device)
-{
-	struct adreno_device *adreno_dev = ADRENO_DEVICE(device);
-
-	/* Standard KGSL gpuid format:
-	 * top word is 0x0002 for 2D or 0x0003 for 3D
-	 * Bottom word is core specific identifer
-	 */
-
-	return (0x0003 << 16) | ((int) adreno_dev->gpurev);
 }
 
 static const struct kgsl_functable adreno_functable = {
