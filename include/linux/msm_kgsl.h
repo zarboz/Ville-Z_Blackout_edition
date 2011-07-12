@@ -2,14 +2,7 @@
 #define _MSM_KGSL_H
 
 #define KGSL_VERSION_MAJOR        3
-
-#ifndef KGSL_VERSION_MINOR
-#if defined(CONFIG_MSM_KGSL_ADRENO220)
-#define KGSL_VERSION_MINOR        2
-#else
-#define KGSL_VERSION_MINOR        8
-#endif
-#endif
+#define KGSL_VERSION_MINOR        5
 
 /*context flags */
 #define KGSL_CONTEXT_SAVE_GMEM	1
