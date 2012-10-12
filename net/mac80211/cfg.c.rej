@@ -1,0 +1,11 @@
+--- net/mac80211/cfg.c
++++ net/mac80211/cfg.c
+@@ -1821,7 +1821,7 @@
+ 	 * so in that case userspace will have to deal with it.
+ 	 */
+ 
+-	if (wk->offchan_tx.wait && wk->offchan_tx.frame)
++	if (wk->offchan_tx.wait && !wk->offchan_tx.status)
+ 		cfg80211_mgmt_tx_status(wk->sdata->dev,
+ 					(unsigned long) wk->offchan_tx.frame,
+ 					wk->ie, wk->ie_len, false, GFP_KERNEL);

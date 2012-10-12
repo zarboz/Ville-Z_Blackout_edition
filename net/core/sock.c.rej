@@ -1,0 +1,10 @@
+--- net/core/sock.c
++++ net/core/sock.c
+@@ -1260,6 +1260,7 @@
+ 			/* It is still raw copy of parent, so invalidate
+ 			 * destructor and make plain sk_free() */
+ 			newsk->sk_destruct = NULL;
++			bh_unlock_sock(newsk);
+ 			sk_free(newsk);
+ 			newsk = NULL;
+ 			goto out;

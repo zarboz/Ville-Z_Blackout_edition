@@ -1,0 +1,10 @@
+--- drivers/mtd/mtdchar.c
++++ drivers/mtd/mtdchar.c
+@@ -320,6 +320,7 @@
+ 			ops.mode = MTD_OOB_RAW;
+ 			ops.datbuf = kbuf;
+ 			ops.oobbuf = NULL;
++			ops.ooboffs = 0;
+ 			ops.len = len;
+ 
+ 			ret = mtd->write_oob(mtd, *ppos, &ops);

@@ -1,0 +1,11 @@
+--- drivers/staging/hv/storvsc_drv.c
++++ drivers/staging/hv/storvsc_drv.c
+@@ -701,6 +701,8 @@
+ 	host->max_id = STORVSC_MAX_TARGETS;
+ 	/* max # of channels */
+ 	host->max_channel = STORVSC_MAX_CHANNELS - 1;
++	/* max cmd length */
++	host->max_cmd_len = STORVSC_MAX_CMD_LEN;
+ 
+ 	/* Register the HBA and start the scsi bus scan */
+ 	ret = scsi_add_host(host, &device->device);

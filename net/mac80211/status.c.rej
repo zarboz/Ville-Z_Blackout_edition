@@ -1,0 +1,11 @@
+--- net/mac80211/status.c
++++ net/mac80211/status.c
+@@ -336,7 +336,7 @@
+ 				continue;
+ 			if (wk->offchan_tx.frame != skb)
+ 				continue;
+-			wk->offchan_tx.frame = NULL;
++			wk->offchan_tx.status = true;
+ 			break;
+ 		}
+ 		rcu_read_unlock();

@@ -1,0 +1,15 @@
+--- sound/soc/codecs/wm8741.c
++++ sound/soc/codecs/wm8741.c
+@@ -337,10 +337,10 @@
+ 		iface |= 0x0004;
+ 		break;
+ 	case SND_SOC_DAIFMT_DSP_A:
+-		iface |= 0x0003;
++		iface |= 0x000C;
+ 		break;
+ 	case SND_SOC_DAIFMT_DSP_B:
+-		iface |= 0x0013;
++		iface |= 0x001C;
+ 		break;
+ 	default:
+ 		return -EINVAL;

@@ -1,0 +1,10 @@
+--- drivers/gpu/drm/radeon/evergreen.c
++++ drivers/gpu/drm/radeon/evergreen.c
+@@ -353,6 +353,7 @@
+ 		default:
+ 			break;
+ 		}
++		radeon_hpd_set_polarity(rdev, radeon_connector->hpd.hpd);
+ 	}
+ 	if (rdev->irq.installed)
+ 		evergreen_irq_set(rdev);

@@ -1,0 +1,10 @@
+--- drivers/staging/hv/hyperv_storage.h
++++ drivers/staging/hv/hyperv_storage.h
+@@ -218,6 +218,7 @@
+ #define STORVSC_MAX_LUNS_PER_TARGET			64
+ #define STORVSC_MAX_TARGETS				1
+ #define STORVSC_MAX_CHANNELS				1
++#define STORVSC_MAX_CMD_LEN				16
+ 
+ struct hv_storvsc_request;
+ 

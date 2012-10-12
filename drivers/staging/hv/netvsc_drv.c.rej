@@ -1,0 +1,12 @@
+--- drivers/staging/hv/netvsc_drv.c
++++ drivers/staging/hv/netvsc_drv.c
+@@ -217,8 +217,8 @@
+ 	if (status == 1) {
+ 		netif_carrier_on(net);
+ 		netif_wake_queue(net);
+-		netif_notify_peers(net);
+ 		ndev_ctx = netdev_priv(net);
++		schedule_delayed_work(&ndev_ctx->dwork, 0);
+ 		schedule_delayed_work(&ndev_ctx->dwork, msecs_to_jiffies(20));
+ 	} else {
+ 		netif_carrier_off(net);

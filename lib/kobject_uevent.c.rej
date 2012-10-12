@@ -1,0 +1,11 @@
+--- lib/kobject_uevent.c
++++ lib/kobject_uevent.c
+@@ -282,7 +282,7 @@
+ 							    kobj_bcast_filter,
+ 							    kobj);
+ 			/* ENOBUFS should be handled in userspace */
+-			if (retval == -ENOBUFS)
++			if (retval == -ENOBUFS || retval == -ESRCH)
+ 				retval = 0;
+ 		} else
+ 			retval = -ENOMEM;

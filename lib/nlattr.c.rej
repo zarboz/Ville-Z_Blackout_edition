@@ -1,0 +1,10 @@
+--- lib/nlattr.c
++++ lib/nlattr.c
+@@ -20,6 +20,7 @@
+ 	[NLA_U16]	= sizeof(u16),
+ 	[NLA_U32]	= sizeof(u32),
+ 	[NLA_U64]	= sizeof(u64),
++	[NLA_MSECS]	= sizeof(u64),
+ 	[NLA_NESTED]	= NLA_HDRLEN,
+ };
+ 

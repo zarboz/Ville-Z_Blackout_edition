@@ -1,0 +1,88 @@
+--- kernel/trace/trace_kprobe.c
++++ kernel/trace/trace_kprobe.c
+@@ -836,11 +836,17 @@
+ }
+ 
+ /* Unregister a trace_probe and probe_event: call with locking probe_lock */
+-static void unregister_trace_probe(struct trace_probe *tp)
++static int unregister_trace_probe(struct trace_probe *tp)
+ {
++	/* Enabled event can not be unregistered */
++	if (trace_probe_is_enabled(tp))
++		return -EBUSY;
++
+ 	__unregister_trace_probe(tp);
+ 	list_del(&tp->list);
+ 	unregister_probe_event(tp);
++
++	return 0;
+ }
+ 
+ /* Register a trace_probe and probe_event */
+@@ -854,7 +860,9 @@
+ 	/* Delete old (same name) event if exist */
+ 	old_tp = find_trace_probe(tp->call.name, tp->call.class->system);
+ 	if (old_tp) {
+-		unregister_trace_probe(old_tp);
++		ret = unregister_trace_probe(old_tp);
++		if (ret < 0)
++			goto end;
+ 		free_trace_probe(old_tp);
+ 	}
+ 
+@@ -892,6 +900,7 @@
+ 	mutex_lock(&probe_lock);
+ 	list_for_each_entry(tp, &probe_list, list) {
+ 		if (trace_probe_within_module(tp, mod)) {
++			/* Don't need to check busy - this should have gone. */
+ 			__unregister_trace_probe(tp);
+ 			ret = __register_trace_probe(tp);
+ 			if (ret)
+@@ -1318,18 +1328,29 @@
+ 	return ret;
+ }
+ 
+-static void release_all_trace_probes(void)
++static int release_all_trace_probes(void)
+ {
+ 	struct trace_probe *tp;
++	int ret = 0;
+ 
+ 	mutex_lock(&probe_lock);
++	/* Ensure no probe is in use. */
++	list_for_each_entry(tp, &probe_list, list)
++		if (trace_probe_is_enabled(tp)) {
++			ret = -EBUSY;
++			goto end;
++		}
+ 	/* TODO: Use batch unregistration */
+ 	while (!list_empty(&probe_list)) {
+ 		tp = list_entry(probe_list.next, struct trace_probe, list);
+ 		unregister_trace_probe(tp);
+ 		free_trace_probe(tp);
+ 	}
++
++end:
+ 	mutex_unlock(&probe_lock);
++
++	return ret;
+ }
+ 
+ /* Probes listing interfaces */
+@@ -1381,9 +1402,13 @@
+ 
+ static int probes_open(struct inode *inode, struct file *file)
+ {
+-	if ((file->f_mode & FMODE_WRITE) &&
+-	    (file->f_flags & O_TRUNC))
+-		release_all_trace_probes();
++	int ret;
++
++	if ((file->f_mode & FMODE_WRITE) && (file->f_flags & O_TRUNC)) {
++		ret = release_all_trace_probes();
++		if (ret < 0)
++			return ret;
++	}
+ 
+ 	return seq_open(file, &probes_seq_op);
+ }

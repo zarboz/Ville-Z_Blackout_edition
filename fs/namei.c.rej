@@ -1,0 +1,115 @@
+--- fs/namei.c
++++ fs/namei.c
+@@ -137,7 +137,7 @@
+ 	return retval;
+ }
+ 
+-static char *getname_flags(const char __user * filename, int flags)
++static char *getname_flags(const char __user *filename, int flags, int *empty)
+ {
+ 	char *tmp, *result;
+ 
+@@ -148,6 +148,8 @@
+ 
+ 		result = tmp;
+ 		if (retval < 0) {
++			if (retval == -ENOENT && empty)
++				*empty = 1;
+ 			if (retval != -ENOENT || !(flags & LOOKUP_EMPTY)) {
+ 				__putname(tmp);
+ 				result = ERR_PTR(retval);
+@@ -160,7 +162,7 @@
+ 
+ char *getname(const char __user * filename)
+ {
+-	return getname_flags(filename, 0);
++	return getname_flags(filename, 0, 0);
+ }
+ 
+ #ifdef CONFIG_AUDITSYSCALL
+@@ -850,7 +852,7 @@
+ 		mntput(path->mnt);
+ 	if (ret == -EISDIR)
+ 		ret = 0;
+-	return ret;
++	return ret < 0 ? ret : need_mntput;
+ }
+ 
+ int follow_down_one(struct path *path)
+@@ -898,6 +900,7 @@
+ 			break;
+ 		path->mnt = mounted;
+ 		path->dentry = mounted->mnt_root;
++		nd->flags |= LOOKUP_JUMPED;
+ 		nd->seq = read_seqcount_begin(&path->dentry->d_seq);
+ 		/*
+ 		 * Update the inode too. We don't need to re-check the
+@@ -1211,6 +1214,8 @@
+ 		path_put_conditional(path, nd);
+ 		return err;
+ 	}
++	if (err)
++		nd->flags |= LOOKUP_JUMPED;
+ 	*inode = path->dentry->d_inode;
+ 	return 0;
+ }
+@@ -1798,11 +1803,11 @@
+ 	return __lookup_hash(&this, base, NULL);
+ }
+ 
+-int user_path_at(int dfd, const char __user *name, unsigned flags,
+-		 struct path *path)
++int user_path_at_empty(int dfd, const char __user *name, unsigned flags,
++		 struct path *path, int *empty)
+ {
+ 	struct nameidata nd;
+-	char *tmp = getname_flags(name, flags);
++	char *tmp = getname_flags(name, flags, empty);
+ 	int err = PTR_ERR(tmp);
+ 	if (!IS_ERR(tmp)) {
+ 
+@@ -1816,6 +1821,12 @@
+ 	return err;
+ }
+ 
++int user_path_at(int dfd, const char __user *name, unsigned flags,
++		 struct path *path)
++{
++	return user_path_at_empty(dfd, name, flags, path, 0);
++}
++
+ static int user_path_parent(int dfd, const char __user *path,
+ 			struct nameidata *nd, char **name)
+ {
+@@ -2141,6 +2152,10 @@
+ 	}
+ 
+ 	/* create side of things */
++	/*
++	 * This will *only* deal with leaving RCU mode - LOOKUP_JUMPED has been
++	 * cleared when we got to the last component we are about to look up
++	 */
+ 	error = complete_walk(nd);
+ 	if (error)
+ 		return ERR_PTR(error);
+@@ -2209,6 +2224,9 @@
+ 	if (error < 0)
+ 		goto exit_dput;
+ 
++	if (error)
++		nd->flags |= LOOKUP_JUMPED;
++
+ 	error = -ENOENT;
+ 	if (!path->dentry->d_inode)
+ 		goto exit_dput;
+@@ -2218,6 +2236,10 @@
+ 
+ 	path_to_nameidata(path, nd);
+ 	nd->inode = path->dentry->d_inode;
++	/* Why this, you ask?  _Now_ we might have grown LOOKUP_JUMPED... */
++	error = complete_walk(nd);
++	if (error)
++		goto exit;
+ 	error = -EISDIR;
+ 	if (S_ISDIR(nd->inode->i_mode))
+ 		goto exit;
