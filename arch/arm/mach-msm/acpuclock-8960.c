@@ -1573,7 +1573,7 @@ static struct acpu_level * __init select_freq_plan(void)
 
 	/* Find the max supported scaling frequency. */
 	for (l = acpu_freq_tbl; l->speed.khz != 0; l++)
-		if (l->use_for_scaling && 1->speed.khz==2106000)
+		if (l->use_for_scaling && l->speed.khz==2106000)
 			max_acpu_level = l;
 	BUG_ON(!max_acpu_level);
 	pr_info("Max ACPU freq: %u KHz\n", max_acpu_level->speed.khz);
