@@ -215,6 +215,11 @@ config TOUCHSCREEN_CYPRESS_CS
 	help
 	  Say Y here if you have cap sensor on your device
 	  If unsure, say N.
+config TOUCHSCREEN_VILLE_SWEEP2WAKE
+	tristate "Sweep2wake for Ville based touchscreens"
+	help
+	  Sweep2wake for the Ville device
+	default y
 
 config TOUCH_KEY_FILTER
 	tristate "Virtualkey and TouchScreen Filter"
