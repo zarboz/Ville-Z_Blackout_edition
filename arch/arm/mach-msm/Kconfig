@@ -2291,7 +2291,7 @@ config ACPU_MAX_FREQ
 
 config CMDLINE_OPTIONS
 	bool "Enable cmdline khz/gov/maxscroff command parsing"
-	default n
+	default y
 	help
 	  This enables the parsing of maxkhz=<VALUEinKHZ>,
 	  minkhz=<VALUEinKHZ>, governor=<GOVERNOR.NAME> and
