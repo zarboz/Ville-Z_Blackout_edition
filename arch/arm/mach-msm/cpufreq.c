@@ -59,7 +59,7 @@ static int set_cpu_freq(struct cpufreq_policy *policy, unsigned int new_freq)
 {
 	int ret = 0;
 #ifdef CONFIG_PERFLOCK
-	int perf_freq = 0;
+	int perf_freq = 2106000;
 #endif
 	struct cpufreq_freqs freqs;
 
@@ -234,8 +234,8 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 
 	policy->cur = cur_freq;
 
-	policy->cpuinfo.transition_latency =
-		acpuclk_get_switch_time() * NSEC_PER_USEC;
+	policy->cpuinfo.transition_latency = 30 * 1000;
+		
 #ifdef CONFIG_SMP
 	cpu_work = &per_cpu(cpufreq_work, policy->cpu);
 	INIT_WORK(&cpu_work->work, set_cpu_work);
