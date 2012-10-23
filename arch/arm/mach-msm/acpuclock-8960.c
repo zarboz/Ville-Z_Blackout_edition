@@ -172,7 +172,7 @@ static void set_acpuclk_L2_freq_foot_print(unsigned khz)
 #define STBY_KHZ		1
 
 #define MAX_VDD_SC    1350000 /* uV */	
-#define MIN_VDD_SC     400000 /* uV */
+#define MIN_VDD_SC     600000 /* uV */
 #define HFPLL_NOMINAL_VDD	1050000
 #define HFPLL_LOW_VDD		 800000
 #define HFPLL_LOW_VDD_PLL_L_MAX	0x28
