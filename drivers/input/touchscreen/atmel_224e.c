@@ -1252,12 +1252,13 @@ static void multi_input_report(struct atmel_ts_data *ts)
 							1, (ts->finger_count == ++finger_report));
 					
 #ifdef CONFIG_TOUCHSCREEN_VILLE_SWEEP2WAKE
-					
-					printk(KERN_INFO "[sweep2wake]: %d=> X:%d, Y:%d, w:%d, z:%d, F:%d\n",
-						loop_i + 1,
-						ts->finger_data[loop_i].x, ts->finger_data[loop_i].y,
-						ts->finger_data[loop_i].w, ts->finger_data[loop_i].z,
-						ts->finger_count);
+					/*Sweep2wakedebugmessage
+					*printk(KERN_INFO "[sweep2wake]: %d=> X:%d, Y:%d, w:%d, z:%d, F:%d\n",
+					*	loop_i + 1,
+					*	ts->finger_data[loop_i].x, ts->finger_data[loop_i].y,
+					*	ts->finger_data[loop_i].w, ts->finger_data[loop_i].z,
+					*	ts->finger_count);
+					*/
                         //left->right
                         if ((ts->finger_count == 1) && (scr_suspended == true) && (s2w_switch > 0)) {
                                 prevx = 10;
