@@ -60,7 +60,7 @@ extern int board_mfg_mode(void);
 static void cy8c_cs_early_suspend(struct early_suspend *h);
 static void cy8c_cs_late_resume(struct early_suspend *h);
 #endif
-#ifdef CONFIG_TOUCHSCREEN_VILLE_SWEEP2WAKE
+#ifdef CONFIG_TOUCHSCREEN_CYPRESS_SWEEP2WAKE
 int s2w_switch = 1;
 bool scr_suspended = false, exec_count = true;
 bool scr_on_touch = false, led_exec_count = false, barrier[2] = {false, false};
@@ -382,7 +382,7 @@ static ssize_t debug_level_show(struct device *dev, struct device_attribute *att
 }
 DEVICE_ATTR(debug_level, (S_IWUSR|S_IRUGO), debug_level_show, debug_level_set);
 
-#ifdef CONFIG_TOUCHSCREEN_VILLE_SWEEP2WAKE
+#ifdef CONFIG_TOUCHSCREEN_CYPRESS_SWEEP2WAKE
 static ssize_t cy8c_sweep2wake_show(struct device *dev,
               struct device_attribute *attr, char *buf)
 {
@@ -458,7 +458,7 @@ static int cy8c_touchkey_sysfs_init(void)
 		printk(KERN_ERR "%s: sysfs_create_file debug_level failed\n", __func__);
 		return ret;
 	}
-#ifdef CONFIG_TOUCHSCREEN_VILLE_SWEEP2WAKE
+#ifdef CONFIG_TOUCHSCREEN_CYPRESS_SWEEP2WAKE
 	ret = sysfs_create_file(android_touchkey_kobj, &dev_attr_sweep2wake.attr);
 	if (ret) {
               printk(KERN_ERR "%s: sysfs_create_file failed\n", __func__);
@@ -478,7 +478,7 @@ static void cy8c_touchkey_sysfs_deinit(void)
 	sysfs_remove_file(android_touchkey_kobj, &dev_attr_debug_level.attr);
 	sysfs_remove_file(android_touchkey_kobj, &dev_attr_reset.attr);
 	sysfs_remove_file(android_touchkey_kobj, &dev_attr_diskey.attr);
-#ifdef CONFIG_TOUCHSCREEN_VILLE_SWEEP2WAKE
+#ifdef CONFIG_TOUCHSCREEN_CYPRESS_SWEEP2WAKE
 	sysfs_remove_file(android_touchkey_kobj, &dev_attr_sweep2wake.attr);
 #endif
 	kobject_del(android_touchkey_kobj);
@@ -545,7 +545,7 @@ err_fw_get_fail:
 
 static void report_key_func(struct cy8c_cs_data *cs, uint8_t vk)
 {
-#ifdef CONFIG_TOUCHSCREEN_VILLE_SWEEP2WAKE
+#ifdef CONFIG_TOUCHSCREEN_CYPRESS_SWEEP2WAKE
 int prevkey =0, nextkey =0;
 #endif
 
@@ -595,7 +595,7 @@ int ret= 0;
 		
 		cs->vk_id = 0;
 		
-#ifdef CONFIG_TOUCHSCREEN_VILLE_SWEEP2WAKE
+#ifdef CONFIG_TOUCHSCREEN_CYPRESS_SWEEP2WAKE
 			//left->right
 			if ((scr_suspended == true) && (s2w_switch == true)) {
 					prevkey = 0;
@@ -653,7 +653,7 @@ int ret= 0;
 				}
 			}
 #endif
-		#ifdef CONFIG_TOUCHSCREEN_VILLE_SWEEP2WAKE
+		#ifdef CONFIG_TOUCHSCREEN_CYPRESS_SWEEP2WAKE
 			 /* if finger released, reset count & barriers */
 			if ((s2w_switch == true)) {
 				if ((scr_suspended == true) &&
