@@ -119,7 +119,16 @@
 #ifdef CONFIG_PERFLOCK
 #include <mach/perflock.h>
 #endif
+#ifdef CONFIG_CPU_FREQ_GOV_ONDEMAND_2_PHASE
+int set_two_phase_freq(int cpufreq);
+#endif
 
+#ifdef CONFIG_CPU_FREQ_GOV_BADASS_2_PHASE
+int set_two_phase_freq_badass(int cpufreq);
+#endif
+#ifdef CONFIG_CPU_FREQ_GOV_BADASS_3_PHASE
+int set_three_phase_freq_badass(int cpufreq);
+#endif
 #define HW_VER_ID_VIRT		(MSM_TLMM_BASE + 0x00002054)
 
 static int camera_sensor_power_enable(char *power, unsigned volt, struct regulator **sensor_power);
@@ -5818,7 +5827,12 @@ static void __init ville_init(void)
 	if(!cpu_is_krait_v1())
 		set_two_phase_freq(1134000);
 #endif
-
+#ifdef CONFIG_CPU_FREQ_GOV_BADASS_2_PHASE
+	set_two_phase_freq_badass(CONFIG_CPU_FREQ_GOV_BADASS_2_PHASE_FREQ);
+#endif
+#ifdef CONFIG_CPU_FREQ_GOV_BADASS_3_PHASE
+	set_three_phase_freq_badass(CONFIG_CPU_FREQ_GOV_BADASS_3_PHASE_FREQ);
+#endif
 	/*usb driver won't be loaded in MFG 58 station and gift mode*/
 	if (!(board_mfg_mode() == 6 || board_mfg_mode() == 7))
 		ville_add_usb_devices();
