@@ -55,9 +55,12 @@ config CPU_FREQ_DEFAULT_GOV_PERFORMANCE
 	select CPU_FREQ_GOV_PERFORMANCE
 	help
 	  Use the CPUFreq governor 'performance' as default. This sets
-	  the frequency statically to the highest frequency supported by
-	  the CPU.
-
+	  the frequency statically to the highest frequency supported by the CPU.
+	 
+config CPU_FREQ_DEFAULT_GOV_PEGASUSQ
+	bool "pegasusq"
+	select CPU_FREQ_GOV_PEGASUSQ
+	
 config CPU_FREQ_DEFAULT_GOV_POWERSAVE
 	bool "powersave"
 	depends on EXPERT
@@ -209,14 +212,12 @@ config CPU_FREQ_DEFAULT_GOV_INTELLIDEMAND
 
 	bool "intellidemand"
 	select CPU_FREQ_GOV_INTELLIDEMAND
-	select CPU_FREQ_GOV_PERFORMANCE
 	help
 	  Use the CPUFreq governor 'intellidemand' as default.
 
 config CPU_FREQ_DEFAULT_GOV_BRAZILIANWAX
 	bool "brazilianwax"
 	select CPU_FREQ_GOV_BRAZILIANWAX
-	select CPU_FREQ_GOV_PERFORMANCE
 	help
 	  Use the CPUFreq governor 'brazilianwax' as default.
 
@@ -247,7 +248,6 @@ config CPU_FREQ_DEFAULT_GOV_ASSWAX
 config CPU_FREQ_DEFAULT_GOV_BADASS
 	bool "badass"
 	select CPU_FREQ_GOV_BADASS
-	select CPU_FREQ_GOV_PERFORMANCE
 	help
 	  Use the CPUFreq governor 'badass' as default. This allows
 	  you to get a full dynamic frequency capable system by simply
@@ -393,6 +393,11 @@ config CPU_FREQ_GOV_ASSWAX
 	depends on CPU_FREQ
 	help
 	  Use as default governors
+	  
+	  
+config CPU_FREQ_GOV_PEGASUSQ
+	tristate "'pegasusq' cpufreq policy governor"
+	depends on CPU_FREQ
 	  
 config CPU_FREQ_GOV_LAGFREE
         tristate "'lagfree' cpufreq governor"
