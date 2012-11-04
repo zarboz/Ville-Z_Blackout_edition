@@ -3334,7 +3334,6 @@ void vcd_handle_ind_info_output_reconfig(
 	}
 }
 <<<<<<< HEAD
-=======
 
 u32 vcd_set_num_slices(struct vcd_clnt_ctxt *cctxt)
 {
@@ -3356,4 +3355,4 @@ u32 vcd_set_num_slices(struct vcd_clnt_ctxt *cctxt)
 	}
 	return rc;
 }
->>>>>>> 8b6e8db... linaro compilable
+
