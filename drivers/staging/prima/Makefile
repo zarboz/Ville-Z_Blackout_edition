@@ -2,7 +2,7 @@ MODNAME := prima_wlan
 
 #Do we panic on bug?  default is to warn
 PANIC_ON_BUG := 0
-
+CLFAGS += 02
 EXTRA_LDFLAGS += --strip-debug
 
 ifeq ($(CONFIG_CFG80211),y)
@@ -74,7 +74,7 @@ HDD_OBJS := 	$(HDD_SRC_DIR)/bap_hdd_main.o \
 		$(HDD_SRC_DIR)/wlan_hdd_early_suspend.o \
 		$(HDD_SRC_DIR)/wlan_hdd_ftm.o \
 		$(HDD_SRC_DIR)/wlan_hdd_hostapd.o \
-		$(HDD_SRC_DIR)/wlan_hdd_oemdata.o \
+		$(HDD_SRC_DIR)/wlan_hdd_innav.o \
 		$(HDD_SRC_DIR)/wlan_hdd_main.o \
 		$(HDD_SRC_DIR)/wlan_hdd_mib.o \
 		$(HDD_SRC_DIR)/wlan_hdd_scan.o \
@@ -219,7 +219,7 @@ SME_CMN_OBJS := $(SME_SRC_DIR)/sme_common/sme_Api.o \
 
 SME_BTC_OBJS := $(SME_SRC_DIR)/btc/btcApi.o
 
-SME_OEM_DATA_OBJS := $(SME_SRC_DIR)/oemData/oemDataApi.o
+SME_MEAS_OBJS := $(SME_SRC_DIR)/meas/measApi.o
 
 SME_P2P_OBJS = $(SME_SRC_DIR)/p2p/p2p_Api.o
 
@@ -229,7 +229,7 @@ SME_OBJS :=	$(SME_BTC_OBJS) \
 		$(SME_CCM_OBJS) \
 		$(SME_CMN_OBJS) \
 		$(SME_CSR_OBJS) \
-		$(SME_OEM_DATA_OBJS) \
+		$(SME_MEAS_OBJS) \
 		$(SME_P2P_OBJS) \
 		$(SME_PMC_OBJS) \
 		$(SME_QOS_OBJS) \
@@ -450,6 +450,10 @@ CDEFINES  := -DANI_PRODUCT_TYPE_CLIENT=1 \
 		-DWNI_POLARIS_FW_OS=6 \
 		-DADVANCED=3 \
 		-DWNI_POLARIS_FW_PACKAGE=9 \
+		-DTRACE_RECORD \
+		-DPE_DEBUG_LOGW \
+		-DPE_DEBUG_LOGE \
+		-DDEBUG \
 		-DANI_LOGDUMP \
 		-DWLAN_PERF \
 		-DUSE_LOCKED_QUEUE \
@@ -457,6 +461,7 @@ CDEFINES  := -DANI_PRODUCT_TYPE_CLIENT=1 \
 		-DFEATURE_WLAN_UAPSD_FW_TRG_FRAMES \
 		-DWLAN_SOFTAP_FEATURE \
 		-Wall\
+		-DWLAN_DEBUG \
 		-D__linux__ \
 		-DMSM_PLATFORM \
 		-DFEATURE_WLAN_INTEGRATED_SOC \
@@ -467,7 +472,6 @@ CDEFINES  := -DANI_PRODUCT_TYPE_CLIENT=1 \
 		-DWLAN_FEATURE_NEIGHBOR_ROAMING_DEBUG \
 		-DWLAN_FEATURE_VOWIFI_11R_DEBUG \
 		-DFEATURE_WLAN_WAPI \
-		-DFEATURE_OEM_DATA_SUPPORT \
 		-DSOFTAP_CHANNEL_RANGE \
 		-DWLAN_AP_STA_CONCURRENCY \
 		-DFEATURE_WLAN_SCAN_PNO \

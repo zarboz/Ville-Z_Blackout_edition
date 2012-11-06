@@ -2,6 +2,10 @@
 # Makefile for the linux kernel.
 #
 
+CLFAGS_workqueue.o += -02
+
+
+
 obj-y     = sched.o fork.o exec_domain.o panic.o printk.o \
 	    cpu.o exit.o itimer.o time.o softirq.o resource.o \
 	    sysctl.o sysctl_binary.o capability.o ptrace.o timer.o user.o \

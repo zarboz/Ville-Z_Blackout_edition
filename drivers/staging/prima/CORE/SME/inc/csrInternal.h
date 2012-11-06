@@ -201,7 +201,6 @@ typedef enum
     eCsrStartIbss,
     eCsrStartIbssSameIbss,
     eCsrReassocToSelfNoCapChange,
-    eCsrStopRoamingDueToConcurrency,
     
 }eCsrJoinState;
 
@@ -540,12 +539,17 @@ typedef struct tagCsrConfig
     tCsr11rConfig csr11rConfig;
 #endif
 
+#ifdef FEATURE_WLAN_LFR
+    tANI_U8   isFastRoamIniFeatureEnabled;
+#endif
+
 #ifdef FEATURE_WLAN_CCX
     tANI_U8   isCcxIniFeatureEnabled;
 #endif
 
-#if  defined (WLAN_FEATURE_VOWIFI_11R) || defined (FEATURE_WLAN_CCX)
+#if  defined (WLAN_FEATURE_VOWIFI_11R) || defined (FEATURE_WLAN_CCX) || defined(FEATURE_WLAN_LFR)
     tANI_U8   isFastTransitionEnabled;
+    tANI_U8   RoamRssiDiff;
 #endif
 
 #ifdef WLAN_FEATURE_NEIGHBOR_ROAMING
@@ -557,9 +561,7 @@ typedef struct tagCsrConfig
     tANI_BOOLEAN addTSWhenACMIsOff;
 
     tANI_BOOLEAN fValidateList;
-#ifndef BMPS_WORKAROUND_NOT_NEEDED
-    tANI_BOOLEAN doBMPSWorkaround;
-#endif
+    tANI_BOOLEAN concurrencyEnabled;
 
     //To enable/disable scanning 2.4Ghz channels twice on a single scan request from HDD
     tANI_BOOLEAN fScanTwice;
@@ -855,8 +857,14 @@ typedef struct tagCsrRoamStruct
 #ifdef WLAN_FEATURE_NEIGHBOR_ROAMING    
     tCsrNeighborRoamControlInfo neighborRoamInfo;
 #endif
+#ifdef FEATURE_WLAN_LFR
+    tANI_U8   isFastRoamIniFeatureEnabled;
+#endif
 #ifdef FEATURE_WLAN_CCX
     tANI_U8   isCcxIniFeatureEnabled;
+#endif
+#if  defined (WLAN_FEATURE_VOWIFI_11R) || defined (FEATURE_WLAN_CCX) || defined(FEATURE_WLAN_LFR)
+    tANI_U8   RoamRssiDiff;
 #endif
 }tCsrRoamStruct;
 
@@ -1002,10 +1010,6 @@ tANI_BOOLEAN csrIsAnySessionInConnectState( tpAniSirGlobal pMac );
 tANI_BOOLEAN csrIsAllSessionDisconnected( tpAniSirGlobal pMac );
 tANI_BOOLEAN csrIsInfraConnected( tpAniSirGlobal pMac );
 tANI_BOOLEAN csrIsConcurrentInfraConnected( tpAniSirGlobal pMac );
-#ifndef BMPS_WORKAROUND_NOT_NEEDED
-tANI_BOOLEAN csrIsConcurrentSessionRunning( tpAniSirGlobal pMac );
-tANI_BOOLEAN csrIsInfraApStarted( tpAniSirGlobal pMac );
-#endif
 tANI_BOOLEAN csrIsIBSSStarted( tpAniSirGlobal pMac );
 tANI_BOOLEAN csrIsBTAMPStarted( tpAniSirGlobal pMac );
 tANI_BOOLEAN csrIsBTAMP( tpAniSirGlobal pMac, tANI_U32 sessionId );
@@ -1181,7 +1185,10 @@ tANI_BOOLEAN csrRoamIs11rAssoc(tpAniSirGlobal pMac);
 tANI_BOOLEAN csrRoamIsCCXAssoc(tpAniSirGlobal pMac);
 #endif
 
-#ifndef BMPS_WORKAROUND_NOT_NEEDED
+
 void csrDisconnectAllActiveSessions(tpAniSirGlobal pMac);
+#ifdef FEATURE_WLAN_LFR
+//Returns whether "Legacy Fast Roaming" is enabled...or not
+tANI_BOOLEAN csrRoamIsFastRoamEnabled(tpAniSirGlobal pMac);
 #endif
 

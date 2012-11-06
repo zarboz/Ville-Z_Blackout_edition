@@ -2115,8 +2115,6 @@ limAddSta(
     retCode = wdaPostCtrlMsg( pMac, &msgQ );
     if( eSIR_SUCCESS != retCode)
     {
-       if (pAddStaParams->respReqd)
-          SET_LIM_PROCESS_DEFD_MESGS(pMac, true);
         limLog( pMac, LOGE, FL("ADD_STA_REQ for aId %d failed (reason %X)\n"),
                             pStaDs->assocId, retCode );
         palFreeMemory(pMac->hHdd, (void*)pAddStaParams);
@@ -2234,8 +2232,6 @@ limDelSta(
     retCode = wdaPostCtrlMsg( pMac, &msgQ );
     if( eSIR_SUCCESS != retCode)
     {
-        if(fRespReqd)
-           SET_LIM_PROCESS_DEFD_MESGS(pMac, true);
         limLog( pMac, LOGE, FL("Posting DELETE_STA_REQ to HAL failed, reason=%X\n"),
                         retCode );
         palFreeMemory(pMac->hHdd, (void*)pDelStaParams);
@@ -2834,7 +2830,6 @@ limDelBss(tpAniSirGlobal pMac, tpDphHashNode pStaDs, tANI_U16 bssIdx,tpPESession
 
     if( eSIR_SUCCESS != (retCode = wdaPostCtrlMsg( pMac, &msgQ )))
     {
-        SET_LIM_PROCESS_DEFD_MESGS(pMac, true);
         limLog( pMac, LOGE, FL("Posting DELETE_BSS_REQ to HAL failed, reason=%X\n"), retCode );
         palFreeMemory(pMac->hHdd, (void*)pDelBssParams);
     }
@@ -3083,8 +3078,7 @@ tSirRetStatus limStaSendAddBss( tpAniSirGlobal pMac, tpSirAssocRsp pAssocRsp,
     }
 #endif
 
-    pAddBssParams->bSpectrumMgtEnabled = psessionEntry->spectrumMgtEnabled || 
-        limIsconnectedOnDFSChannel(bssDescription->channelId);
+    pAddBssParams->bSpectrumMgtEnabled = psessionEntry->spectrumMgtEnabled;
 
 #if defined WLAN_FEATURE_VOWIFI_11R
     pAddBssParams->extSetStaKeyParamValid = 0;
@@ -3112,7 +3106,6 @@ tSirRetStatus limStaSendAddBss( tpAniSirGlobal pMac, tpSirAssocRsp pAssocRsp,
     retCode = wdaPostCtrlMsg( pMac, &msgQ );
     if( eSIR_SUCCESS != retCode) 
     {
-        SET_LIM_PROCESS_DEFD_MESGS(pMac, true);
         palFreeMemory(pMac->hHdd, pAddBssParams);
         limLog( pMac, LOGE, FL("Posting ADD_BSS_REQ to HAL failed, reason=%X\n"),
                 retCode );
@@ -3318,8 +3311,7 @@ tSirRetStatus limStaSendAddBssPreAssoc( tpAniSirGlobal pMac, tANI_U8 updateEntry
     
     pAddBssParams->halPersona = (tANI_U8)psessionEntry->pePersona; //update persona
 
-    pAddBssParams->bSpectrumMgtEnabled = psessionEntry->spectrumMgtEnabled || 
-        limIsconnectedOnDFSChannel(bssDescription->channelId);
+    pAddBssParams->bSpectrumMgtEnabled = psessionEntry->spectrumMgtEnabled;
 
 #if defined WLAN_FEATURE_VOWIFI_11R
     pAddBssParams->extSetStaKeyParamValid = 0;
@@ -3347,7 +3339,6 @@ tSirRetStatus limStaSendAddBssPreAssoc( tpAniSirGlobal pMac, tANI_U8 updateEntry
     retCode = wdaPostCtrlMsg( pMac, &msgQ );
     if( eSIR_SUCCESS != retCode) 
     {
-        SET_LIM_PROCESS_DEFD_MESGS(pMac, true);
         palFreeMemory(pMac->hHdd, pAddBssParams);
         limLog( pMac, LOGE, FL("Posting ADD_BSS_REQ to HAL failed, reason=%X\n"),
                 retCode );

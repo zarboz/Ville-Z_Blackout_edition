@@ -1,6 +1,10 @@
 # Makefile for staging directory
 
 # fix for build system bug...
+ifdef CONFIG_CC_OPTIMIZE_ALOT
+CFLAGS_prima += -02
+endif
+
 obj-$(CONFIG_STAGING)		+= staging.o
 
 obj-y += tty/
