@@ -1041,29 +1041,6 @@ static void msg_process_multitouch(struct atmel_ts_data *ts, uint8_t *data, uint
 				input_sync(ts->input_dev);
 			}
 
-<<<<<<< HEAD
-			if (!ts->finger_count)
-				printk(KERN_ERR "[TP]TOUCH_ERR: finger count has reached zero\n");
-			else
-				ts->finger_count--;
-			ts->finger_pressed &= ~BIT(idx);
-			if (!ts->first_pressed) {
-				if (!ts->finger_count)
-					ts->first_pressed = 1;
-				printk(KERN_INFO "[TP]E%d@%d,%d\n",
-					idx + 1, ts->finger_data[idx].x, ts->finger_data[idx].y);
-			}
-			if (ts->pre_data[0] < RECALIB_DONE) {
-				if (ts->finger_count == 0) {
-					if (ts->pre_data[0] == RECALIB_NEED &&
-						!ts->unlock_attr && idx == 0 &&
-						ts->finger_data[idx].y > 750 &&
-						ts->finger_data[idx].y - ts->pre_data[idx+1] > 135) {
-							restore_normal_threshold(ts);
-							confirm_calibration(ts, 1, 0);
-					} else if (ts->pre_data[0] == RECALIB_UNLOCK &&
-						ts->unlock_attr && idx == 0 &&
-=======
 		if (!(ts->finger_pressed & BIT(idx)))
 			/* end since finger was not pressed */
 			return;
@@ -1102,7 +1079,6 @@ static void msg_process_multitouch(struct atmel_ts_data *ts, uint8_t *data, uint
 						get_object_address(ts, GEN_COMMANDPROCESSOR_T6) +
 						T6_CFG_CALIBRATE, 0x55);
 				} else if (ts->unlock_attr && idx == 0 &&
->>>>>>> b2f3a6c... input: touchscreen: atmel_224e: fix for dead zones on resume
 						time_after(jiffies, ts->valid_press_timeout)) {
 						ts->valid_pressed_cnt++;
 						if (ts->pre_data[0] == RECALIB_UNLOCK &&
@@ -1113,7 +1089,7 @@ static void msg_process_multitouch(struct atmel_ts_data *ts, uint8_t *data, uint
 						}
 					} else if (ts->pre_data[0] == RECALIB_NG)
 						ts->pre_data[0] = RECALIB_NEED;
-				} else {
+				 else {
 					if (ts->pre_data[0] < RECALIB_UNLOCK)
 						i2c_atmel_write_byte_data(ts->client,
 							get_object_address(ts, GEN_COMMANDPROCESSOR_T6) +
