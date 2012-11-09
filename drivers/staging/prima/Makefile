@@ -1,8 +1,7 @@
 MODNAME := prima_wlan
-
+EXTRA_CFLAGS += -O1
 #Do we panic on bug?  default is to warn
 PANIC_ON_BUG := 0
-CLFAGS += 02
 EXTRA_LDFLAGS += --strip-debug
 
 ifeq ($(CONFIG_CFG80211),y)
