@@ -23,6 +23,7 @@
 #include <linux/proc_fs.h>
 
 #include <asm/setup.h>
+#include <mach/htc_wifi_nvs.h>
 
 /* configuration tags specific to msm */
 #define ATAG_MSM_WIFI	0x57494649 /* MSM WiFi */
