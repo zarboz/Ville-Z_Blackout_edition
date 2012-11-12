@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Code Aurora Forum. All rights reserved.
+ * Copyright (c) 2012, The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -164,7 +164,7 @@ v_BOOL_t vos_concurrent_sessions_running(void)
     {
        pHddCtx = vos_get_context( VOS_MODULE_ID_HDD, pVosContext);
 
-       for (i=0;i<VOS_MAX_NO_OF_MODE; i++)
+       for (i=0; i < VOS_MAX_NO_OF_MODE; i++)
        {
           j += pHddCtx->no_of_sessions[i];
        }

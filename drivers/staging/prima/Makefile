@@ -1,9 +1,8 @@
-MODNAME := prima_wlan
-EXTRA_CFLAGS += -O1
+MODNAME := wlan
+
 #Do we panic on bug?  default is to warn
 PANIC_ON_BUG := 0
-EXTRA_LDFLAGS += --strip-debug
-
+EXTRA_CFLAGS += -O1
 ifeq ($(CONFIG_CFG80211),y)
 HAVE_CFG80211 := 1
 else
@@ -73,7 +72,7 @@ HDD_OBJS := 	$(HDD_SRC_DIR)/bap_hdd_main.o \
 		$(HDD_SRC_DIR)/wlan_hdd_early_suspend.o \
 		$(HDD_SRC_DIR)/wlan_hdd_ftm.o \
 		$(HDD_SRC_DIR)/wlan_hdd_hostapd.o \
-		$(HDD_SRC_DIR)/wlan_hdd_innav.o \
+		$(HDD_SRC_DIR)/wlan_hdd_oemdata.o \
 		$(HDD_SRC_DIR)/wlan_hdd_main.o \
 		$(HDD_SRC_DIR)/wlan_hdd_mib.o \
 		$(HDD_SRC_DIR)/wlan_hdd_scan.o \
@@ -218,7 +217,7 @@ SME_CMN_OBJS := $(SME_SRC_DIR)/sme_common/sme_Api.o \
 
 SME_BTC_OBJS := $(SME_SRC_DIR)/btc/btcApi.o
 
-SME_MEAS_OBJS := $(SME_SRC_DIR)/meas/measApi.o
+SME_OEM_DATA_OBJS := $(SME_SRC_DIR)/oemData/oemDataApi.o
 
 SME_P2P_OBJS = $(SME_SRC_DIR)/p2p/p2p_Api.o
 
@@ -228,7 +227,7 @@ SME_OBJS :=	$(SME_BTC_OBJS) \
 		$(SME_CCM_OBJS) \
 		$(SME_CMN_OBJS) \
 		$(SME_CSR_OBJS) \
-		$(SME_MEAS_OBJS) \
+		$(SME_OEM_DATA_OBJS) \
 		$(SME_P2P_OBJS) \
 		$(SME_PMC_OBJS) \
 		$(SME_QOS_OBJS) \
@@ -471,6 +470,7 @@ CDEFINES  := -DANI_PRODUCT_TYPE_CLIENT=1 \
 		-DWLAN_FEATURE_NEIGHBOR_ROAMING_DEBUG \
 		-DWLAN_FEATURE_VOWIFI_11R_DEBUG \
 		-DFEATURE_WLAN_WAPI \
+		-DFEATURE_OEM_DATA_SUPPORT \
 		-DSOFTAP_CHANNEL_RANGE \
 		-DWLAN_AP_STA_CONCURRENCY \
 		-DFEATURE_WLAN_SCAN_PNO \
@@ -524,6 +524,10 @@ endif
 ifeq ($(CONFIG_PRIMA_WLAN_BTAMP),y)
 CDEFINES += -DWLAN_BTAMP_FEATURE
 endif
+
+CDEFINES += -DWLAN_FEATURE_11AC
+
+CDEFINES += -DWLAN_OPEN_SOURCE
 
 KBUILD_CPPFLAGS += $(CDEFINES)
 

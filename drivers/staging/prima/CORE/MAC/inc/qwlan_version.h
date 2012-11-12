@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Code Aurora Forum. All rights reserved.
+ * Copyright (c) 2012, The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -23,7 +23,7 @@
 #define QWLAN_VERSION_H
 /*===========================================================================
 
-FILE: 
+FILE:
    qwlan_version.h
 
 BRIEF DESCRIPTION:
@@ -40,8 +40,8 @@ BRIEF DESCRIPTION:
 #define QWLAN_VERSION_MINOR            2
 #define QWLAN_VERSION_PATCH            0
 #define QWLAN_VERSION_EXTRA            ""
-#define QWLAN_VERSION_BUILD            2
+#define QWLAN_VERSION_BUILD            10
 
-#define QWLAN_VERSIONSTR               "3.2.0.2"
+#define QWLAN_VERSIONSTR               "3.2.0.10"
 
 #endif /* QWLAN_VERSION_H */

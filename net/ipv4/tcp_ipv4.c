@@ -79,9 +79,33 @@
 #include <linux/stddef.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
+#include <linux/debugfs.h>/*Ethan Ge add on 20120323*/
 
 #include <linux/crypto.h>
 #include <linux/scatterlist.h>
+/*Ethan Ge add on 20120323*/
+#define peak_period 1
+#define debug_usage 0
+#define media_threshold 51200
+#define heavy_rate 51200          /*50k*/
+#define heavy_datasize 943718400 /* 900M byte*/
+#define light_rate 5120 		/*5k*/
+#define light_datasize 512000 /* 500k byte*/
+
+
+static long before_sec=0;
+static unsigned long int average_rate=0;
+static unsigned long int average_rate_count=0;
+static unsigned long int total_data=0;
+
+
+
+
+
+
+
+
+/*Ethan Ge add end 20120323*/
 
 int sysctl_tcp_tw_reuse __read_mostly;
 int sysctl_tcp_low_latency __read_mostly;
@@ -635,7 +659,7 @@ static void tcp_v4_send_reset(struct sock *sk, struct sk_buff *skb)
 	arg.iov[0].iov_len  = sizeof(rep.th);
 
 #ifdef CONFIG_TCP_MD5SIG
-	key = sk ? tcp_v4_md5_do_lookup(sk, ip_hdr(skb)->daddr) : NULL;
+	key = sk ? tcp_v4_md5_do_lookup(sk, ip_hdr(skb)->saddr) : NULL;
 	if (key) {
 		rep.opt[0] = htonl((TCPOPT_NOP << 24) |
 				   (TCPOPT_NOP << 16) |
@@ -655,6 +679,11 @@ static void tcp_v4_send_reset(struct sock *sk, struct sk_buff *skb)
 				      arg.iov[0].iov_len, IPPROTO_TCP, 0);
 	arg.csumoffset = offsetof(struct tcphdr, check) / 2;
 	arg.flags = (sk && inet_sk(sk)->transparent) ? IP_REPLY_ARG_NOSRCCHECK : 0;
+	/* When socket is gone, all binding information is lost.
+	 * routing might fail in this case. using iif for oif to
+	 * make sure we can deliver it
+	 */
+	arg.bound_dev_if = sk ? sk->sk_bound_dev_if : inet_iif(skb);
 
 	net = dev_net(skb_dst(skb)->dev);
 	ip_send_reply(net->ipv4.tcp_sock, skb, ip_hdr(skb)->saddr,
@@ -914,18 +943,21 @@ int tcp_v4_md5_do_add(struct sock *sk, __be32 addr,
 			}
 			sk_nocaps_add(sk, NETIF_F_GSO_MASK);
 		}
-		if (tcp_alloc_md5sig_pool(sk) == NULL) {
+
+		md5sig = tp->md5sig_info;
+		if (md5sig->entries4 == 0 &&
+		    tcp_alloc_md5sig_pool(sk) == NULL) {
 			kfree(newkey);
 			return -ENOMEM;
 		}
-		md5sig = tp->md5sig_info;
 
 		if (md5sig->alloced4 == md5sig->entries4) {
 			keys = kmalloc((sizeof(*keys) *
 					(md5sig->entries4 + 1)), GFP_ATOMIC);
 			if (!keys) {
 				kfree(newkey);
-				tcp_free_md5sig_pool();
+				if (md5sig->entries4 == 0)
+					tcp_free_md5sig_pool();
 				return -ENOMEM;
 			}
 
@@ -969,6 +1001,7 @@ int tcp_v4_md5_do_del(struct sock *sk, __be32 addr)
 				kfree(tp->md5sig_info->keys4);
 				tp->md5sig_info->keys4 = NULL;
 				tp->md5sig_info->alloced4 = 0;
+				tcp_free_md5sig_pool();
 			} else if (tp->md5sig_info->entries4 != i) {
 				/* Need to do some manipulation */
 				memmove(&tp->md5sig_info->keys4[i],
@@ -976,7 +1009,6 @@ int tcp_v4_md5_do_del(struct sock *sk, __be32 addr)
 					(tp->md5sig_info->entries4 - i) *
 					 sizeof(struct tcp4_md5sig_key));
 			}
-			tcp_free_md5sig_pool();
 			return 0;
 		}
 	}
@@ -1451,9 +1483,13 @@ struct sock *tcp_v4_syn_recv_sock(struct sock *sk, struct sk_buff *skb,
 		inet_csk(newsk)->icsk_ext_hdr_len = inet_opt->opt.optlen;
 	newinet->inet_id = newtp->write_seq ^ jiffies;
 
-	if (!dst && (dst = inet_csk_route_child_sock(sk, newsk, req)) == NULL)
-		goto put_and_exit;
-
+	if (!dst) {
+		dst = inet_csk_route_child_sock(sk, newsk, req);
+		if (!dst)
+			goto put_and_exit;
+	} else {
+		/* syncookie case : see end of cookie_v4_check() */
+	}
 	sk_setup_caps(newsk, dst);
 
 	tcp_mtup_init(newsk);
@@ -1555,6 +1591,146 @@ static __sum16 tcp_v4_checksum_init(struct sk_buff *skb)
 }
 
 
+/*Ethan Ge add on 20120323*/
+
+
+static int data_usage_get(void *data, u64 *val)
+{
+	 unsigned int weight;
+
+	if(average_rate/average_rate_count>heavy_rate&&total_data>heavy_datasize)
+	{
+		weight=(average_rate/average_rate_count)/(heavy_rate)+(total_data)/(heavy_datasize);
+
+		if(weight>19)
+			weight=19;
+
+		*val=80+weight;
+
+#if debug_usage
+		printk("%s---*val=%llu %%---average_rate=%ld Byte/s---total_data=%ld Byte-----weight=%d %%---\n"
+		,__FUNCTION__,*val,average_rate/average_rate_count,total_data,weight);
+#endif
+	}
+	else
+	{
+		weight=(average_rate/average_rate_count)/(light_rate)+(total_data)/(light_datasize);
+
+		if(weight>39)
+			weight=39;
+
+		*val=40+weight;
+
+#if debug_usage
+		printk("%s---*val=%llu %%---average_rate=%ld Byte/s---total_data=%ld Byte-----weight=%d %%---\n"
+		,__FUNCTION__,*val,average_rate/average_rate_count,total_data,weight);
+#endif
+	}
+
+	average_rate=0;
+	average_rate_count=0;
+	total_data=0;
+
+
+
+	return 0;
+}
+DEFINE_SIMPLE_ATTRIBUTE(data_usage_fops, data_usage_get, NULL, "%llu\n");
+
+
+
+
+
+static int __init data_usage_init(void)
+{
+	struct dentry *dent=NULL;
+
+
+
+	dent = debugfs_create_dir("data_usage", dent);
+	if (IS_ERR(dent)) {
+		printk("%s: failed to create debugfs dir for data_usage_init\n", __func__);
+		return PTR_ERR(dent);
+	}
+
+	debugfs_create_file("enable", 0644, dent, NULL, &data_usage_fops);
+
+
+	return 0;
+}
+
+
+device_initcall(data_usage_init);
+
+
+
+
+
+
+
+
+
+void Caculate(struct sock *sk,struct sk_buff *skb)
+{
+
+	static unsigned int total_len=0;
+	unsigned int uid=0;
+	long now;
+
+
+
+
+
+	if (skb!=NULL&&sk != NULL&&sk->sk_socket!=NULL&&sk->sk_socket->file!=NULL&&sk->sk_socket->file->f_cred!=NULL)
+	{
+		if(skb->len==0)
+		return;
+
+
+		uid=sk->sk_socket->file->f_cred->fsuid;
+
+		if(uid==0||uid==1000)
+		return;
+
+	}
+
+
+	now=get_seconds();
+
+
+	/*count for daily data size*/
+	total_data+=skb->len;
+
+	if (now-before_sec<peak_period)
+	{
+
+		total_len+=skb->len;
+
+
+
+	}
+	else
+	{
+
+		/*count for daily throughput rate*/
+		average_rate+=total_len;
+		average_rate_count++;
+
+		/*printk("%s-------average_rate=%ld----total_data=%ld-\n",__FUNCTION__,average_rate/average_rate_count,total_data);*/
+
+		before_sec=get_seconds();
+		total_len=skb->len;/*for next sec data len*/
+
+
+
+	}
+
+
+}
+
+/*Ethan Ge add end 20120323*/
+
+
 /* The socket must have it's spinlock held when we get
  * here.
  *
@@ -1576,6 +1752,9 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 	if (tcp_v4_inbound_md5_hash(sk, skb))
 		goto discard;
 #endif
+
+	Caculate(sk,skb);/*Ethan add 20120502*/
+
 
 	if (sk->sk_state == TCP_ESTABLISHED) { /* Fast path */
 		sock_rps_save_rxhash(sk, skb->rxhash);
