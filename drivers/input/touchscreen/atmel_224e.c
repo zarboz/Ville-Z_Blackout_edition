@@ -269,16 +269,14 @@ extern void sweep2wake_setleddev(struct led_classdev * led_dev) {
 EXPORT_SYMBOL(sweep2wake_setleddev);
 
 static void sweep2wake_presspwr(struct work_struct * sweep2wake_presspwr_work) {
-	if (!mutex_trylock(&pwrlock));
-	    return;
-        input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 1);
-        input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
-        msleep(75);
-        input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 0);
-        input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
-        msleep(75);
-        mutex_unlock(&pwrlock);
-        return;
+	input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 1);
+	input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
+	msleep(100);
+	input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 0);
+	input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
+	msleep(100);
+	mutex_unlock(&pwrlock);
+	return;
 }
 static DECLARE_WORK(sweep2wake_presspwr_work, sweep2wake_presspwr);
 
@@ -870,7 +868,7 @@ static ssize_t atmel_sweep2wake_about_show(struct device *dev,
 {
 	size_t count = 0;
 
-	count += sprintf(buf, "Ported to ATMEL by Chad Goodman from SHOWP1984's CYPRESS version - All other ATMEL versions are a kang.  SYSFS files for start and end points are 100percent Chad Goodman and kanged by olivercj and coolexe.  ATMEL version (C) 2012 Chad Goodman - All Rights Reserved.\n");
+	count += sprintf(buf, "Ported to ATMEL by Chad Goodman Signed Off for Ville by Zarboz\n");
 
 	return count;
 }
@@ -2839,21 +2837,8 @@ static int atmel_224e_ts_resume(struct i2c_client *client)
 {
 	struct atmel_ts_data *ts = i2c_get_clientdata(client);
 	uint8_t loop_i = 0;
-	int ret;
 #ifdef CONFIG_TOUCHSCREEN_VILLE_SWEEP2WAKE
         if (s2w_switch > 0) {
-	  /* HW revision fix, this is not needed for all touch controllers!
-		 * suspend me for a short while, so that resume can wake me up the right way
-		 *
-		 * --NO IDEA IF THIS IS NEEDED ON THE ONE X, INCLUDE IT TO BE SURE FOR NOW!--
-		 *
-		 */
-		ret = i2c_atmel_write_byte_data(client,
-			get_object_address(ts, GEN_POWERCONFIG_T7) + T7_CFG_IDLEACQINT, 0x0); /* sleep */
-		if (ret < 0)
-			;
-		msleep(150);
-		ret = 0;
                 //screen on, disable_irq_wake
                 scr_suspended = false;
                 disable_irq_wake(client->irq);
