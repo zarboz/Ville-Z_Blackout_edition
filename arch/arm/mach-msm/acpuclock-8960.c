@@ -1407,22 +1407,7 @@ static struct acpu_level * __init select_freq_plan(void)
 			l2_freq_tbl = l2_freq_tbl_8960_kraitv2;
 			l2_freq_tbl_size = ARRAY_SIZE(l2_freq_tbl_8960_kraitv2);
 		}
-	} else if (cpu_is_apq8064()) {
-		scalable = scalable_8064;
-		acpu_freq_tbl = acpu_freq_tbl_8064;
-		l2_freq_tbl = l2_freq_tbl_8064;
-		l2_freq_tbl_size = ARRAY_SIZE(l2_freq_tbl_8064);
-	} else if (cpu_is_msm8627()) {
-		scalable = scalable_8627;
-		acpu_freq_tbl = acpu_freq_tbl_8627;
-		l2_freq_tbl = l2_freq_tbl_8627;
-		l2_freq_tbl_size = ARRAY_SIZE(l2_freq_tbl_8627);
-	} else if (cpu_is_msm8930()) {
-		scalable = scalable_8930;
-		acpu_freq_tbl = acpu_freq_tbl_8930;
-		l2_freq_tbl = l2_freq_tbl_8930;
-		l2_freq_tbl_size = ARRAY_SIZE(l2_freq_tbl_8930);
-	} else {
+	}  /*else */{
 		BUG();
 	}
 	if (krait_needs_vmin()) {
@@ -1469,6 +1454,3 @@ struct acpuclk_soc_data acpuclk_8960_soc_data __initdata = {
 	.init = acpuclk_8960_init,
 };
 
-struct acpuclk_soc_data acpuclk_8930_soc_data __initdata = {
-	.init = acpuclk_8960_init,
-};
