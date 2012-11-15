@@ -602,14 +602,14 @@ int ret= 0;
 					nextkey = 4;
 					barrier[0] = true;
 					if ((barrier[1] == true) ||
-					   ((cs->vk_id = vk > prevkey) &&
-					    (cs->vk_id = vk < nextkey) &&
-					    (cs->vk_id = vk > 1))) {
+					   ((vk_id > prevkey) &&
+					    (vk_id < nextkey) &&
+					    (vk_id > 1))) {
 						prevkey = 0;
 						barrier[1] = true;
-						if ((cs->vk_id = vk > prevkey) &&
-						    (cs->vk_id = vk > 2)) {
-							if (cs->vk_id = vk > 1) {
+						if ((vk_id > prevkey) &&
+						    (vk_id > 2)) {
+							if (vk_id > 1) {
 								if (exec_count) {
 									printk(KERN_INFO "[sweep2wake]: ON");
 									sweep2wake_pwrtrigger();
@@ -626,21 +626,21 @@ int ret= 0;
 				prevkey = 4;
 				nextkey = 0;
 				if ((barrier[0] == true) ||
-				   ((cs->vk_id = vk < prevkey) &&
-				    (cs->vk_id = vk > nextkey) &&
-				    (cs->vk_id = vk > 1))) {
+				   ((vk_id < prevkey) &&
+				    (vk_id > nextkey) &&
+				    (vk_id > 1))) {
 					prevkey = 2;
 					nextkey = 0;
 					barrier[0] = true;
 					if ((barrier[1] == true) ||
-					   ((cs->vk_id = vk < prevkey) &&
-					    (cs->vk_id = vk > nextkey) &&
-					      (cs->vk_id = vk < 2))) {
+					   ((vk_id < prevkey) &&
+					    (vk_id > nextkey) &&
+					      (vk_idk < 2))) {
 						  prevkey = 0;
 						    barrier[1] = true;
-						if ((cs->vk_id = vk > prevkey) &&
-						    (cs->vk_id = vk < 4)) {
-							if (cs->vk_id = vk < 2) {
+						if ((vk_id > prevkey) &&
+						    (vk_id < 4)) {
+							if (vk_id < 2) {
 								if (exec_count) {
 									printk(KERN_INFO "[sweep2wake]: OFF");
 									sweep2wake_pwrtrigger();
