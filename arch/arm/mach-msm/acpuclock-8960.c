@@ -63,6 +63,7 @@
 #define pr_debug(fmt, args...) \
 	printk(KERN_DEBUG "[ACPU] " pr_fmt(fmt), ## args)
 #endif
+#define FREQ_TABLE_SIZE 51
 
 /*
 PHY define in msm_iomap-8960.h, VIRT define in msm_iomap.h
@@ -801,7 +802,10 @@ static int acpuclk_8960_set_rate(int cpu, unsigned long rate,
 		rc = -EINVAL;
 		goto out;
 	}
-
+#ifdef CONFIG_CMDLINE_OPTIONS
+	if ((cmdline_scroff == true) && (rate >cmdline_maxscroff))
+	    rate = cmdline_maxscroff;
+#endif
 	if (reason == SETRATE_CPUFREQ || reason == SETRATE_HOTPLUG)
 		mutex_lock(&driver_lock);
 
@@ -1068,7 +1072,7 @@ static void __init bus_init(void)
 }
 
 #ifdef CONFIG_CPU_FREQ_MSM
-static struct cpufreq_frequency_table freq_table[NR_CPUS][30];
+static struct cpufreq_frequency_table freq_table[NR_CPUS][FREQ_TABLE_SIZE];
 
 static void __init cpufreq_table_init(void)
 {
