@@ -1311,6 +1311,25 @@ static struct acpuclk_data acpuclk_8960_data = {
 	.wait_for_irq_khz = STBY_KHZ,
 };
 
+int processor_name_read_proc(char *page, char **start, off_t off,
+			   int count, int *eof, void *data)
+{
+	char *p = page;
+//sourced from C.Goodman/BigWillyG's ButteredToast tree
+#ifdef CONFIG_CMDLINE_OPTIONS
+	if (cmdline_maxkhz) {
+		p += sprintf(p, "%u", (cmdline_maxkhz/1000));
+		p += sprintf(p, "MHz Blackout Dual Core");
+	} else {
+#endif
+		p += sprintf(p, "%u", (CONFIG_MSM_CPU_FREQ_MAX/1000));
+		p += sprintf(p, "MHz Blackout Dual Core");
+#ifdef CONFIG_CMDLINE_OPTIONS
+	}
+#endif
+	return p - page;
+}
+
 static int __init acpuclk_8960_init(struct acpuclk_soc_data *soc_data)
 {
 	struct acpu_level *max_acpu_level = select_freq_plan();
