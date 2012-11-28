@@ -26,7 +26,13 @@
 
 #ifdef CONFIG_MSM_MPDEC
 extern uint32_t acpu_check_khz_value(unsigned long khz);
-
+#endif
+#ifdef CONFIG_CMDLINE_OPTIONS
+extern uint32_t cmdline_maxkhz, cmdline_minkhz;
+extern char cmdline_gov[16];
+extern int cmdline_gov_cnt;
+extern uint32_t cmdline_maxscroff;
+extern bool cmdline_scroff;
 #endif
 /*********************************************************************
  *                     CPUFREQ NOTIFIER INTERFACE                    *
