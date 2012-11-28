@@ -22,7 +22,6 @@
 #include <linux/clk.h>
 #include <mach/hardware.h>
 #include <mach/iommu_domains.h>
-#include <mach/iommu.h>
 #include <linux/io.h>
 #include <linux/debugfs.h>
 #include <linux/fb.h>
@@ -99,7 +98,7 @@ struct mdp4_overlay_ctrl {
 static struct mdp4_overlay_ctrl *ctrl = &mdp4_overlay_db;
 static int new_perf_level;
 static struct ion_client *display_iclient;
-static struct mdp4_iommu_pipe_info mdp_iommu[MDP4_MIXER_MAX][OVERLAY_PIPE_MAX];
+static struct mdp4_iommu_pipe_info mdp_iommu[MDP4_MIXER_MAX][OVERLAY_PIPE_RGB3];
 
 int mdp4_overlay_iommu_map_buf(int mem_id,
 	struct mdp4_overlay_pipe *pipe, unsigned int plane,
@@ -160,7 +159,7 @@ void mdp4_iommu_unmap(struct mdp4_overlay_pipe *pipe)
 	if (!display_iclient)
 		return;
 
-	for (j = 0; j < OVERLAY_PIPE_MAX; j++) {
+	for (j = 0; j < OVERLAY_PIPE_RGB3; j++) {
 		iom_pipe_info = &mdp_iommu[pipe->mixer_num][j];
 		for (i = 0; i < MDP4_MAX_PLANE; i++) {
 			if (iom_pipe_info->prev_ihdl[i]) {
@@ -1364,7 +1363,7 @@ int mdp4_mixer_info(int mixer_num, struct mdp_mixer_info *info)
 	int ndx, cnt;
 	struct mdp4_overlay_pipe *pipe;
 
-	if (mixer_num > MDP4_MIXER_MAX)
+	if (mixer_num >= MDP4_MIXER_MAX)
 		return -ENODEV;
 
 	cnt = 0;
@@ -2241,7 +2240,7 @@ static int mdp4_overlay_is_rgb_type(int format)
 static uint32 mdp4_overlay_get_perf_level(struct mdp_overlay *req,
 					  struct msm_fb_data_type *mfd)
 {
-	int is_fg;
+	int is_fg = 0;
 
 	if (req->is_fg && ((req->alpha & 0x0ff) == 0xff))
 		is_fg = 1;
@@ -2634,7 +2633,7 @@ int mdp4_overlay_update_layers(struct msm_fb_data_type *mfd, int mixer)
 	u32 mask = 0, pipe_cnt = 0;
 	boolean pipe_mixer_change = false;
 
-	if (mixer > MDP4_MIXER_MAX)
+	if (mixer >= MDP4_MIXER_MAX)
 		return -ENODEV;
 
 	for (stage = MDP4_MIXER_STAGE0; stage < MDP4_MIXER_STAGE_MAX; stage++) {
@@ -2980,7 +2979,6 @@ int mdp4_overlay_play(struct fb_info *info, struct msmfb_overlay_data *req)
 			}
 #ifdef CONFIG_FB_MSM_MIPI_DSI
 			if (ctrl->panel_mode & MDP4_PANEL_DSI_CMD) {
-				mdp4_iommu_attach();
 				mdp4_dsi_cmd_dma_busy_wait(mfd);
 				mdp4_dsi_cmd_kickoff_video(mfd, pipe);
 			}
@@ -3001,6 +2999,7 @@ int mdp4_overlay_play(struct fb_info *info, struct msmfb_overlay_data *req)
 	mdp4_stat.overlay_play[pipe->mixer_num]++;
 	mutex_unlock(&mfd->dma->ov_mutex);
 
+	++mfd->panel_info.frame_count;
 
 	if (msmfb_debug_mask & FPS) {
 		ovp_now = ktime_get();
@@ -3044,63 +3043,4 @@ end:
 		put_pmem_file(srcp2_file);
 #endif
 	return ret;
-}
-
-static struct {
-	char *name;
-	int  domain;
-} msm_iommu_ctx_names[] = {
-	/* Display */
-	{
-		.name = "mdp_vg1",
-		.domain = DISPLAY_DOMAIN,
-	},
-	/* Display */
-	{
-		.name = "mdp_vg2",
-		.domain = DISPLAY_DOMAIN,
-	},
-	/* Display */
-	{
-		.name = "mdp_rgb1",
-		.domain = DISPLAY_DOMAIN,
-	},
-	/* Display */
-	{
-		.name = "mdp_rgb2",
-		.domain = DISPLAY_DOMAIN,
-	},
-};
-
-void mdp4_iommu_attach(void)
-{
-	static int done;
-	struct iommu_domain *domain;
-	int i;
-
-	if (!done) {
-		for (i = 0; i < ARRAY_SIZE(msm_iommu_ctx_names); i++) {
-			int domain_idx;
-			struct device *ctx = msm_iommu_get_ctx(
-				msm_iommu_ctx_names[i].name);
-
-			if (!ctx)
-				continue;
-
-			domain_idx = msm_iommu_ctx_names[i].domain;
-
-			domain = msm_get_iommu_domain(domain_idx);
-			if (!domain)
-				continue;
-
-			if (iommu_attach_device(domain,	ctx)) {
-				WARN(1, "%s: could not attach domain %d to context %s."
-					" iommu programming will not occur.\n",
-					__func__, domain_idx,
-					msm_iommu_ctx_names[i].name);
-				continue;
-			}
-		}
-		done = 1;
-	}
 }
