@@ -61,7 +61,7 @@ static int override_cpu;
  */
 
 /* to be safe, fill vars with defaults */
-uint32_t cmdline_maxkhz = 1188000, cmdline_minkhz = 192000;
+uint32_t cmdline_maxkhz = 1512000, cmdline_minkhz = 192000;
 
 #ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE
 char cmdline_gov[16] = "performance";
@@ -87,6 +87,37 @@ char cmdline_gov[16] = "smartassV2";
 #ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_LAGFREE
 char cmdline_gov[16] = "lagfree";
 #endif
+#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_SMARTASS
+char cmdline_gov[16] = "smartass";
+#endif
+#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_LAZY
+char cmdline_gov[16] = "lazy";
+#endif
+#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMANDX
+char cmdline_gov[16] = "ondemandx";
+#endif
+#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_INTERACTIVEX
+char cmdline_gov[16] = "interactivex";
+#endif
+#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_INTELLIDEMAND
+char cmdline_gov[16] = "intellidemand";
+#endif
+#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_WHEATLEY
+char cmdline_gov[16] = "wheatley";
+#endif
+#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_SCARY
+char cmdline_gov[16] = "scary";
+#endif
+#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_ASSWAX
+char cmdline_gov[16] = "AssWax";
+#endif
+#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_BADASS
+char cmdline_gov[16] = "badass";
+#endif
+#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_HOTPLUG
+char cmdline_gov[16] = "hotplug";
+#endif
+
 uint32_t cmdline_maxscroff = 486000;
 bool cmdline_scroff = false;
 
@@ -385,14 +416,32 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 
 	table = cpufreq_frequency_get_table(policy->cpu);
 	if (cpufreq_frequency_table_cpuinfo(policy, table)) {
+#ifdef CONFIG_CMDLINE_OPTIONS
+		if ((cmdline_maxkhz) && (cmdline_minkhz)) {
+			policy->cpuinfo.min_freq = cmdline_minkhz;
+			policy->cpuinfo.max_freq = cmdline_maxkhz;
+		} else {
+#endif
 #ifdef CONFIG_MSM_CPU_FREQ_SET_MIN_MAX
 		policy->cpuinfo.min_freq = CONFIG_MSM_CPU_FREQ_MIN;
 		policy->cpuinfo.max_freq = CONFIG_MSM_CPU_FREQ_MAX;
 #endif
+#ifdef CONFIG_CMDLINE_OPTIONS
+		}
+#endif
 	}
+#ifdef CONFIG_CMDLINE_OPTIONS
+	if ((cmdline_maxkhz) && (cmdline_minkhz)) {
+		policy->min = cmdline_minkhz;
+		policy->max = cmdline_maxkhz;
+	} else {
+#endif
 #ifdef CONFIG_MSM_CPU_FREQ_SET_MIN_MAX
 	policy->min = CONFIG_MSM_CPU_FREQ_MIN;
 	policy->max = CONFIG_MSM_CPU_FREQ_MAX;
+#endif
+#ifdef CONFIG_CMDLINE_OPTIONS
+	}
 #endif
 
 	cur_freq = acpuclk_get_rate(policy->cpu);
@@ -424,6 +473,13 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 	cpu_work = &per_cpu(cpufreq_work, policy->cpu);
 	INIT_WORK(&cpu_work->work, set_cpu_work);
 	init_completion(&cpu_work->complete);
+#endif
+/* set safe default min and max speeds */
+#ifdef CONFIG_CMDLINE_OPTIONS
+	if ((cmdline_maxkhz) && (cmdline_minkhz)) {
+		policy->min  = cmdline_minkhz;
+		policy->max = cmdline_maxkhz;
+	} 
 #endif
 	return 0;
 }
@@ -486,8 +542,57 @@ static ssize_t store_mfreq(struct sysdev_class *class,
 
 static SYSDEV_CLASS_ATTR(mfreq, 0200, NULL, store_mfreq);
 
+#ifdef CONFIG_CMDLINE_OPTIONS
+static ssize_t show_max_screen_off_khz(struct cpufreq_policy *policy, char *buf)
+{
+	return sprintf(buf, "%u\n", cmdline_maxscroff);
+}
+
+static ssize_t store_max_screen_off_khz(struct cpufreq_policy *policy,
+		const char *buf, size_t count)
+{
+	unsigned int freq = 0;
+	int ret;
+	int index;
+	struct cpufreq_frequency_table *freq_table = cpufreq_frequency_get_table(policy->cpu);
+
+	if (!freq_table)
+		return -EINVAL;
+
+	ret = sscanf(buf, "%u", &freq);
+	if (ret != 1)
+		return -EINVAL;
+
+	mutex_lock(&per_cpu(cpufreq_suspend, policy->cpu).suspend_mutex);
+
+	ret = cpufreq_frequency_table_target(policy, freq_table, freq,
+			CPUFREQ_RELATION_H, &index);
+	if (ret)
+		goto out;
+
+	cmdline_maxscroff = freq_table[index].frequency;
+
+	ret = count;
+
+out:
+	mutex_unlock(&per_cpu(cpufreq_suspend, policy->cpu).suspend_mutex);
+	return ret;
+}
+
+struct freq_attr msm_cpufreq_attr_max_screen_off_khz = {
+	.attr = { .name = "screen_off_max_freq",
+		.mode = 0644,
+	},
+	.show = show_max_screen_off_khz,
+	.store = store_max_screen_off_khz,
+};
+#endif
+
 static struct freq_attr *msm_freq_attr[] = {
 	&cpufreq_freq_attr_scaling_available_freqs,
+#ifdef CONFIG_CMDLINE_OPTIONS
+	&msm_cpufreq_attr_max_screen_off_khz,
+#endif
 	NULL,
 };
 
