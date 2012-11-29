@@ -415,35 +415,26 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 		return -ENODEV;
 
 	table = cpufreq_frequency_get_table(policy->cpu);
+	if (table == NULL)
+		return -ENODEV;
 	if (cpufreq_frequency_table_cpuinfo(policy, table)) {
-#ifdef CONFIG_CMDLINE_OPTIONS
-		if ((cmdline_maxkhz) && (cmdline_minkhz)) {
-			policy->cpuinfo.min_freq = cmdline_minkhz;
-			policy->cpuinfo.max_freq = cmdline_maxkhz;
-		} else {
-#endif
-#ifdef CONFIG_MSM_CPU_FREQ_SET_MIN_MAX
-		policy->cpuinfo.min_freq = CONFIG_MSM_CPU_FREQ_MIN;
-		policy->cpuinfo.max_freq = CONFIG_MSM_CPU_FREQ_MAX;
-#endif
-#ifdef CONFIG_CMDLINE_OPTIONS
-		}
+ #ifdef CONFIG_CMDLINE_OPTIONS
+ 		
+ 			policy->cpuinfo.min_freq = cmdline_minkhz;
+		policy->cpuinfo.max_freq = cmdline_maxkhz;
+		
 #endif
 	}
 #ifdef CONFIG_CMDLINE_OPTIONS
-	if ((cmdline_maxkhz) && (cmdline_minkhz)) {
+ 	
+ 		policy->min = cmdline_minkhz;
+ 		policy->max = cmdline_maxkhz;
+ 	
+ #endif
+#ifdef CONFIG_MSM_CPU_FREQ_SET_MIN_MAX
 		policy->min = cmdline_minkhz;
 		policy->max = cmdline_maxkhz;
-	} else {
 #endif
-#ifdef CONFIG_MSM_CPU_FREQ_SET_MIN_MAX
-	policy->min = CONFIG_MSM_CPU_FREQ_MIN;
-	policy->max = CONFIG_MSM_CPU_FREQ_MAX;
-#endif
-#ifdef CONFIG_CMDLINE_OPTIONS
-	}
-#endif
-
 	cur_freq = acpuclk_get_rate(policy->cpu);
 	if (cpufreq_frequency_table_target(policy, table, cur_freq,
 	    CPUFREQ_RELATION_H, &index) &&
@@ -467,20 +458,27 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 
 	policy->cur = cur_freq;
 
-	policy->cpuinfo.transition_latency = 10 * 1000;
-		
+	policy->cpuinfo.transition_latency =
+		acpuclk_get_switch_time() * NSEC_PER_USEC;
 #ifdef CONFIG_SMP
 	cpu_work = &per_cpu(cpufreq_work, policy->cpu);
 	INIT_WORK(&cpu_work->work, set_cpu_work);
 	init_completion(&cpu_work->complete);
 #endif
-/* set safe default min and max speeds */
+	/* set safe default min and max speeds */
 #ifdef CONFIG_CMDLINE_OPTIONS
 	if ((cmdline_maxkhz) && (cmdline_minkhz)) {
 		policy->min  = cmdline_minkhz;
 		policy->max = cmdline_maxkhz;
-	} 
+	} /*else {*/
 #endif
+// #ifdef CONFIG_MSM_CPU_FREQ_SET_MIN_MAX
+// 		policy->min = CONFIG_MSM_CPU_FREQ_MIN;
+// 		policy->max = CONFIG_MSM_CPU_FREQ_MAX;
+// #endif
+// #ifdef CONFIG_CMDLINE_OPTIONS
+// 	}
+// #endif
 	return 0;
 }
 

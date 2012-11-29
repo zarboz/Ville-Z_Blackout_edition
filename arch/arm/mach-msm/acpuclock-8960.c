@@ -35,6 +35,7 @@
 #include <mach/msm-krait-l2-accessors.h>
 #include <mach/rpm-regulator.h>
 
+
 #include "acpuclock.h"
 #include <mach/board_htc.h>
 
@@ -90,54 +91,21 @@ acpuclk_set_rate footprint cpu1		: phy 0x889F1040 : virt 0xFE703040
 #define CPU_FOOT_PRINT_BASE_CPU0_VIRT		(MSM_KERNEL_FOOTPRINT_BASE + 0x0)
 static void set_acpuclk_foot_print(unsigned cpu, unsigned state)
 {
-#ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT89GHZ
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x40) + cpu;
-#endif
-#ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT7GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3c) + cpu;
-#endif
-#ifdef CONFIG_MSM_CPU_MAX_CLK_2DOT1GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x42) + cpu;
-#endif
-#ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT5GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3C) + cpu;
-#endif
 	*status = (CPU_FOOT_PRINT_MAGIC | state);
 	mb();
 }
 
 static void set_acpuclk_cpu_freq_foot_print(unsigned cpu, unsigned khz)
 {
-#ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT89GHZ
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x40) + cpu;
-#endif
-#ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT7GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3c) + cpu;
-#endif
-#ifdef CONFIG_MSM_CPU_MAX_CLK_2DOT1GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x42) + cpu;
-#endif
-#ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT5GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x30) + cpu;
-#endif
 	*status = khz;
 	mb();
 }
 
 static void set_acpuclk_L2_freq_foot_print(unsigned khz)
 {
-#ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT89GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x40);
-#endif
-#ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT7GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3c);
-#endif
-#ifdef CONFIG_MSM_CPU_MAX_CLK_2DOT1GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x42);
-#endif
-#ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT5GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x30);
-#endif
+	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x36);
 	*status = khz;
 	mb();
 }
@@ -172,8 +140,18 @@ static void set_acpuclk_L2_freq_foot_print(unsigned khz)
 
 #define STBY_KHZ		1
 
-#define MAX_VDD_SC    1350000 /* uV */	
-#define MIN_VDD_SC     600000 /* uV */
+#define MAX_VDD_SC		1450000 /* uV */
+#define MIN_VDD_SC		 700000 /* uV */
+#define MAX_VDD_MEM		1450000 /* uV */
+#define MAX_VDD_DIG		1300000 /* uV */
+#define MAX_AXI			 310500 /* KHz */
+#define SCPLL_LOW_VDD_FMAX	 594000 /* KHz */
+#define SCPLL_LOW_VDD		1000000 /* uV */
+#define SCPLL_NOMINAL_VDD	1100000 /* uV */
+#define SHOT_SWITCH		4
+#define HOP_SWITCH		5
+#define SIMPLE_SLEW		6
+#define COMPLEX_SLEW		7
 #define HFPLL_NOMINAL_VDD	1050000
 #define HFPLL_LOW_VDD		 800000
 #define HFPLL_LOW_VDD_PLL_L_MAX	0x28
@@ -398,17 +376,10 @@ static struct acpu_level acpu_freq_tbl_8960_kraitv2_blackout[] = {
 	{ 0, {  1404000, HFPLL, 1, 0, 0x34 }, L2(16), 1125000 },
 	{ 1, {  1458000, HFPLL, 1, 0, 0x36 }, L2(16), 1137500 },
 	{ 1, {  1512000, HFPLL, 1, 0, 0x38 }, L2(18), 1150000 },
-#ifndef CONFIG_MSM_CPU_MAX_CLK_1DOT5GHZ
 	{ 1, {  1674000, HFPLL, 1, 0, 0x3A }, L2(18), 1175000 },
 	{ 1, {  1728000, HFPLL, 1, 0, 0x3C }, L2(19), 1200000 },
-#ifndef CONFIG_MSM_CPU_MAX_CLK_1DOT7GHZ
 	{ 1, {  1809000, HFPLL, 1, 0, 0x3E }, L2(19), 1250000 },
 	{ 1, {  1890000, HFPLL, 1, 0, 0x40 }, L2(20), 1275000 },
-#ifndef CONFIG_MSM_CPU_MAX_CLK_1DOT89GHZ
-	{ 1, {  1998000, HFPLL, 1, 0, 0x42 }, L2(21), 1300000 },
-#endif
-#endif
-#endif
         { 0, { 0 } }
 };
 
@@ -1179,7 +1150,7 @@ static void kraitv2_apply_vmin(struct acpu_level *tbl)
 #ifdef CONFIG_CMDLINE_OPTIONS
 uint32_t acpu_check_khz_value(unsigned long khz)
 {
-	struct acpu_level *f;
+	struct clkctl_acpu_speed *f;
 
 	if (khz > 1944000)
 		return CONFIG_MSM_CPU_FREQ_MAX;
@@ -1216,6 +1187,7 @@ uint32_t acpu_check_khz_value(unsigned long khz)
 	return 0;
 }
 EXPORT_SYMBOL(acpu_check_khz_value);
+/* end cmdline_khz */
 #endif
 
 static struct acpu_level * __init select_freq_plan(void)
