@@ -97,7 +97,7 @@ static void set_acpuclk_foot_print(unsigned cpu, unsigned state)
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3c) + cpu;
 #endif
 #ifdef CONFIG_MSM_CPU_MAX_CLK_2DOT1GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x44) + cpu;
+	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x42) + cpu;
 #endif
 #ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT5GHZ
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3C) + cpu;
@@ -115,7 +115,7 @@ static void set_acpuclk_cpu_freq_foot_print(unsigned cpu, unsigned khz)
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3c) + cpu;
 #endif
 #ifdef CONFIG_MSM_CPU_MAX_CLK_2DOT1GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x44) + cpu;
+	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x42) + cpu;
 #endif
 #ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT5GHZ
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x30) + cpu;
@@ -123,7 +123,7 @@ static void set_acpuclk_cpu_freq_foot_print(unsigned cpu, unsigned khz)
 	*status = khz;
 	mb();
 }
-//like a fucking boss
+
 static void set_acpuclk_L2_freq_foot_print(unsigned khz)
 {
 #ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT89GHZ
@@ -406,7 +406,6 @@ static struct acpu_level acpu_freq_tbl_8960_kraitv2_blackout[] = {
 	{ 1, {  1890000, HFPLL, 1, 0, 0x40 }, L2(20), 1275000 },
 #ifndef CONFIG_MSM_CPU_MAX_CLK_1DOT89GHZ
 	{ 1, {  1998000, HFPLL, 1, 0, 0x42 }, L2(21), 1300000 },
-	{ 1, {  2106000, HFPLL, 1, 0, 0x44 }, L2(22), 1325000 },
 #endif
 #endif
 #endif
