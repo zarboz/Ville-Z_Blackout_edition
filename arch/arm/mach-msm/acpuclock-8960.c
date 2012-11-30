@@ -105,7 +105,7 @@ static void set_acpuclk_cpu_freq_foot_print(unsigned cpu, unsigned khz)
 
 static void set_acpuclk_L2_freq_foot_print(unsigned khz)
 {
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x36);
+	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x40);
 	*status = khz;
 	mb();
 }
@@ -1150,7 +1150,7 @@ static void kraitv2_apply_vmin(struct acpu_level *tbl)
 #ifdef CONFIG_CMDLINE_OPTIONS
 uint32_t acpu_check_khz_value(unsigned long khz)
 {
-	struct clkctl_acpu_speed *f;
+	struct acpu_level *f;
 
 	if (khz > 1944000)
 		return CONFIG_MSM_CPU_FREQ_MAX;
@@ -1286,7 +1286,6 @@ int processor_name_read_proc(char *page, char **start, off_t off,
 			   int count, int *eof, void *data)
 {
 	char *p = page;
-//sourced from C.Goodman/BigWillyG's ButteredToast tree
 #ifdef CONFIG_CMDLINE_OPTIONS
 	if (cmdline_maxkhz) {
 		p += sprintf(p, "%u", (cmdline_maxkhz/1000));
