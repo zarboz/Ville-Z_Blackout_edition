@@ -91,21 +91,21 @@ acpuclk_set_rate footprint cpu1		: phy 0x889F1040 : virt 0xFE703040
 #define CPU_FOOT_PRINT_BASE_CPU0_VIRT		(MSM_KERNEL_FOOTPRINT_BASE + 0x0)
 static void set_acpuclk_foot_print(unsigned cpu, unsigned state)
 {
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x40) + cpu;
+	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x44) + cpu;
 	*status = (CPU_FOOT_PRINT_MAGIC | state);
 	mb();
 }
 
 static void set_acpuclk_cpu_freq_foot_print(unsigned cpu, unsigned khz)
 {
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x40) + cpu;
+	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x44) + cpu;
 	*status = khz;
 	mb();
 }
 
 static void set_acpuclk_L2_freq_foot_print(unsigned khz)
 {
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x40);
+	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x36);
 	*status = khz;
 	mb();
 }
@@ -380,6 +380,8 @@ static struct acpu_level acpu_freq_tbl_8960_kraitv2_blackout[] = {
 	{ 1, {  1728000, HFPLL, 1, 0, 0x3C }, L2(19), 1200000 },
 	{ 1, {  1809000, HFPLL, 1, 0, 0x3E }, L2(19), 1250000 },
 	{ 1, {  1890000, HFPLL, 1, 0, 0x40 }, L2(20), 1275000 },
+	{ 1, {  1998000, HFPLL, 1, 0, 0x42 }, L2(21), 1325000 },
+        { 1, {  2106000, HFPLL, 1, 0, 0x44 }, L2(21), 1350000 },
         { 0, { 0 } }
 };
 
@@ -1152,7 +1154,7 @@ uint32_t acpu_check_khz_value(unsigned long khz)
 {
 	struct acpu_level *f;
 
-	if (khz > 1944000)
+	if (khz > 2106000)
 		return CONFIG_MSM_CPU_FREQ_MAX;
 
 	if (khz < 192)

@@ -641,7 +641,7 @@ static ssize_t show_bios_limit(struct cpufreq_policy *policy, char *buf)
 	}
 	return sprintf(buf, "%u\n", policy->cpuinfo.max_freq);
 }
-
+extern ssize_t acpuclk_get_vdd_levels_str(char *buf, int isApp);
 /**
  * set_scaling_max - change max freq with variables provided
  */
