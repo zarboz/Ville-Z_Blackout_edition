@@ -1,6 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Linux/arm 3.0.54-Beastmode-BRICKED- Kernel Configuration
+# Linux/arm 3.0.56-Beastmode-BRICKED Kernel Configuration
 #
 CONFIG_ARM=y
 CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -313,8 +313,6 @@ CONFIG_MSM_MPM=y
 CONFIG_MSM_XO=y
 CONFIG_MSM_REMOTE_SPINLOCK_SFPB=y
 # CONFIG_PERFLOCK is not set
-# CONFIG_PERFLOCK_BOOT_LOCK is not set
-# CONFIG_PERFLOCK_SCREEN_POLICY is not set
 
 #
 # MSM Board Selection
