@@ -85,7 +85,7 @@ extern int is_perf_locked(void);
 extern void perflock_scaling_max_freq(unsigned int freq, unsigned int cpu);
 extern void perflock_scaling_min_freq(unsigned int freq, unsigned int cpu);
 extern int perflock_override(const struct cpufreq_policy *policy, const unsigned int new_freq);
-extern void htc_print_active_perf_locks(void);
+static inline void htc_print_active_perf_locks(void) { return; }
 #endif
 
 

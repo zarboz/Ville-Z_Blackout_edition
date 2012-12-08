@@ -26,10 +26,10 @@
 #include "proc_comm.h"
 #include "acpuclock.h"
 
+#if 0
 #define PERF_LOCK_INITIALIZED	(1U << 0)
 #define PERF_LOCK_ACTIVE	(1U << 1)
 
-#ifdef CONFIG_PERFLOCK
 enum {
 	PERF_LOCK_DEBUG = 1U << 0,
 	PERF_EXPIRE_DEBUG = 1U << 1,
@@ -670,7 +670,7 @@ invalid_config:
 		cpufreq_ceiling_acpu_table, table_size, PERF_LOCK_INVALID);
 }
 
-#else
+#endif
 void perf_lock(struct perf_lock *lock) { return; }
 EXPORT_SYMBOL(perf_lock);
 
@@ -685,4 +685,3 @@ EXPORT_SYMBOL(is_perf_locked);
 
 void perf_lock_init(struct perf_lock *lock, unsigned int level, const char *name) { return; }
 EXPORT_SYMBOL(perf_lock_init);
-#endif

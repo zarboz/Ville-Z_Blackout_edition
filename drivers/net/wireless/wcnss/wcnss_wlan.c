@@ -380,7 +380,7 @@ wcnss_wlan_probe(struct platform_device *pdev)
 		return -ENODEV;
 	}
 
-#ifdef CONFIG_PERFLOCK
+#if 0
         perf_lock_init(&qcom_wlan_perf_lock, PERF_LOCK_HIGHEST, "qcom-wifi-perf");
 #endif /* CONFIG_PERFLOCK */
 

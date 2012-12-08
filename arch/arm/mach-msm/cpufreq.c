@@ -29,7 +29,7 @@
 #include <mach/socinfo.h>
 
 #include "acpuclock.h"
-#ifdef CONFIG_PERFLOCK
+#if 0
 #include <mach/perflock.h>
 #endif
 
