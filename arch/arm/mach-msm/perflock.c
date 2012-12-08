@@ -29,6 +29,7 @@
 #define PERF_LOCK_INITIALIZED	(1U << 0)
 #define PERF_LOCK_ACTIVE	(1U << 1)
 
+#ifdef CONFIG_PERFLOCK
 enum {
 	PERF_LOCK_DEBUG = 1U << 0,
 	PERF_EXPIRE_DEBUG = 1U << 1,
@@ -668,3 +669,20 @@ invalid_config:
 	pr_err("%s: invalid configuration data, %p %d %d\n", __func__,
 		cpufreq_ceiling_acpu_table, table_size, PERF_LOCK_INVALID);
 }
+
+#else
+void perf_lock(struct perf_lock *lock) { return; }
+EXPORT_SYMBOL(perf_lock);
+
+void perf_unlock(struct perf_lock *lock) { return; }
+EXPORT_SYMBOL(perf_unlock);
+
+inline int is_perf_lock_active(struct perf_lock *lock) { return 0; }
+EXPORT_SYMBOL(is_perf_lock_active);
+
+int is_perf_locked(void) { return 0; }
+EXPORT_SYMBOL(is_perf_locked);
+
+void perf_lock_init(struct perf_lock *lock, unsigned int level, const char *name) { return; }
+EXPORT_SYMBOL(perf_lock_init);
+#endif
