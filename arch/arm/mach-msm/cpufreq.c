@@ -61,7 +61,7 @@ static int override_cpu;
  */
 
 /* to be safe, fill vars with defaults */
-uint32_t cmdline_maxkhz = 1512000, cmdline_minkhz = 192000;
+uint32_t cmdline_maxkhz = 2108000, cmdline_minkhz = 192000;
 
 #ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE
 char cmdline_gov[16] = "performance";
@@ -454,7 +454,7 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 	init_completion(&cpu_work->complete);
 #endif
 	/* set safe default min and max speeds */
-		policy->min  = cmdline_minkhz;
+		policy->min = cmdline_minkhz;
 		policy->max = cmdline_maxkhz;
 	return 0;
 }
