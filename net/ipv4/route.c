@@ -2751,8 +2751,14 @@ out:
 
 struct rtable *__ip_route_output_key(struct net *net, struct flowi4 *flp4)
 {
-	struct rtable *rth;
+	struct rtable *rth = NULL;
 	unsigned int hash;
+
+    if (IS_ERR(net) || (!net))
+    {
+        printk("[NET] net is NULL in %s\n", __func__);
+		return rth;
+	}
 
 	if (!rt_caching(net))
 		goto slow_output;
