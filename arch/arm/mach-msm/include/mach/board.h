@@ -635,7 +635,7 @@ struct t_mhl_status_notifier{
 int mhl_detect_register_notifier(struct t_mhl_status_notifier *);
 static LIST_HEAD(g_lh_mhl_detect_notifier_list);
 
-#if (defined(CONFIG_USB_OTG) && defined(CONFIG_USB_OTG_HOST))
+#ifdef CONFIG_USB_OTG
 /***********************************
 Direction: cable detect drvier -> usb driver
  ***********************************/
@@ -667,7 +667,10 @@ extern unsigned int msm_shared_ram_phys; /* defined in arch/arm/mach-msm/io.c */
 
 extern int emmc_partition_read_proc(char *page, char **start, off_t off,
 				int count, int *eof, void *data);
-
+#ifdef CONFIG_ARCH_MSM8960
+extern int processor_name_read_proc(char *page, char **start, off_t off,
+			   int count, int *eof, void *data);
+#endif
 extern int dying_processors_read_proc(char *page, char **start, off_t off,
 				int count, int *eof, void *data);
 extern int get_partition_num_by_name(char *name);

@@ -47,7 +47,7 @@
 #define WDT_HZ		32768
 
 static void __iomem *msm_tmr0_base;
-
+#define PET_DELAY 10000
 static unsigned long delay_time;
 static unsigned long bark_time;
 static unsigned long long last_pet;

@@ -119,6 +119,14 @@
 #ifdef CONFIG_PERFLOCK
 #include <mach/perflock.h>
 #endif
+
+#ifdef CONFIG_CMDLINE_OPTIONS
+	/* setters for cmdline_gpu */
+	int set_kgsl_3d0_freq(unsigned int freq0, unsigned int freq1);
+	int set_kgsl_2d0_freq(unsigned int freq);
+	int set_kgsl_2d1_freq(unsigned int freq);
+#endif
+	
 #ifdef CONFIG_CPU_FREQ_GOV_ONDEMAND_2_PHASE
 int set_two_phase_freq(int cpufreq);
 #endif
@@ -4168,63 +4176,29 @@ static struct usb_mass_storage_platform_data mass_storage_pdata = {
 #ifdef CONFIG_USB_MSM_OTG_72K
 static struct msm_otg_platform_data msm_otg_pdata;
 #else
-#define USB_5V_EN		42
+#define USB_5V_EN		VILLE_GPIO_V_BOOST_5V_EN
+
+static uint32_t USB_5V_EN_pin_ouput_table[] = {
+	GPIO_CFG(USB_5V_EN, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+};
+
 static void msm_hsusb_vbus_power(bool on)
 {
-	int rc;
-	static bool vbus_is_on;
-	static struct regulator *mvs_otg_switch;
-	struct pm_gpio param = {
-		.direction	= PM_GPIO_DIR_OUT,
-		.output_buffer	= PM_GPIO_OUT_BUF_CMOS,
-		.output_value	= 1,
-		.pull		= PM_GPIO_PULL_NO,
-		.vin_sel	= PM_GPIO_VIN_S4,
-		.out_strength	= PM_GPIO_STRENGTH_MED,
-		.function	= PM_GPIO_FUNC_NORMAL,
-	};
+	static bool vbus_is_on = false;
 
 	if (vbus_is_on == on)
 		return;
 
-	printk(KERN_INFO "%s: %d\n", __func__, on);
+	gpio_tlmm_config(USB_5V_EN_pin_ouput_table[0], GPIO_CFG_ENABLE);
 
 	if (on) {
-		mvs_otg_switch = regulator_get(&msm8960_device_otg.dev,
-					       "vbus_otg");
-		if (IS_ERR(mvs_otg_switch)) {
-			pr_err("Unable to get mvs_otg_switch\n");
-			return;
-		}
-
-		rc = gpio_request(PM8921_GPIO_PM_TO_SYS(USB_5V_EN),
-						"usb_5v_en");
-		if (rc < 0) {
-			pr_err("failed to request usb_5v_en gpio\n");
-			goto put_mvs_otg;
-		}
-
-		if (regulator_enable(mvs_otg_switch)) {
-			pr_err("unable to enable mvs_otg_switch\n");
-			goto free_usb_5v_en;
-		}
-
-		rc = pm8xxx_gpio_config(PM8921_GPIO_PM_TO_SYS(USB_5V_EN),
-				&param);
-		if (rc < 0) {
-			pr_err("failed to configure usb_5v_en gpio\n");
-			goto disable_mvs_otg;
-		}
-		vbus_is_on = true;
-		return;
+		gpio_set_value(USB_5V_EN, 1);
+		pr_info("[USB] %s: Enable 5V power\n",  __func__);
+	} else {
+		gpio_set_value(USB_5V_EN, 0);
+		pr_info("[USB] %s: Disable 5V power\n",  __func__);
 	}
-disable_mvs_otg:
-		regulator_disable(mvs_otg_switch);
-free_usb_5v_en:
-		gpio_free(PM8921_GPIO_PM_TO_SYS(USB_5V_EN));
-put_mvs_otg:
-		regulator_put(mvs_otg_switch);
-		vbus_is_on = false;
+	vbus_is_on = on;
 }
 
 static int phy_init_seq_v3[] = { 0x7f, 0x81, 0x3c, 0x82, -1};
@@ -4490,7 +4464,7 @@ static struct msm_spm_platform_data msm_spm_data[] __initdata = {
 	},
 };
 
-#ifdef CONFIG_PERFLOCK
+#if 0
 static unsigned ville_perf_acpu_table[] = {
 	918000000, /* LOWEST */
 	1188000000, /* LOW */
@@ -5296,7 +5270,7 @@ static struct pm8xxx_led_configure pm8921_led_info[] = {
 	[0] = {
 		.name		= "button-backlight",
 		.flags		= PM8XXX_ID_LED_0,
-		.function_flags = LED_PWM_FUNCTION | LED_BRETH_FUNCTION,
+		.function_flags = LED_PWM_FUNCTION | LED_BRETH_FUNCTION | PM8XXX_LED_MODE_MANUAL,
 		.period_us 	= USEC_PER_SEC / 1000,
 		.start_index 	= 0,
 		.duites_size 	= 8,
@@ -5818,7 +5792,7 @@ static void __init ville_init(void)
 	create_proc_read_entry("emmc", 0, NULL, emmc_partition_read_proc, NULL);
 	create_proc_read_entry("dying_processes", 0, NULL, dying_processors_read_proc, NULL);
 
-#ifdef CONFIG_PERFLOCK
+#if 0
 	perflock_init(&ville_perflock_data);
 	cpufreq_ceiling_init(&ville_cpufreq_ceiling_data);
 #endif
@@ -5833,6 +5807,14 @@ static void __init ville_init(void)
 #ifdef CONFIG_CPU_FREQ_GOV_BADASS_3_PHASE
 	set_three_phase_freq_badass(CONFIG_CPU_FREQ_GOV_BADASS_3_PHASE_FREQ);
 #endif
+	
+#ifdef CONFIG_CMDLINE_OPTIONS
+	/* setters for cmdline_gpu */
+	set_kgsl_3d0_freq(cmdline_3dgpu[0], cmdline_3dgpu[1]);
+	set_kgsl_2d0_freq(cmdline_2dgpu);
+	set_kgsl_2d1_freq(cmdline_2dgpu);
+#endif
+
 	/*usb driver won't be loaded in MFG 58 station and gift mode*/
 	if (!(board_mfg_mode() == 6 || board_mfg_mode() == 7))
 		ville_add_usb_devices();
